@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   LiveKitRoom,
   useVoiceAssistant,
+  useLocalParticipant,
   BarVisualizer,
   RoomAudioRenderer,
   DisconnectButton,
@@ -20,6 +21,24 @@ interface ConnectionDetails {
 
 function VoiceAssistantUI() {
   const { state, audioTrack } = useVoiceAssistant();
+  const { localParticipant, isMicrophoneEnabled } = useLocalParticipant();
+
+  // Debug mic status
+  useEffect(() => {
+    console.log("[VoiceChat] mic enabled:", isMicrophoneEnabled);
+    console.log("[VoiceChat] mic track:", localParticipant.getTrackPublication("microphone"));
+    console.log("[VoiceChat] audio tracks:", localParticipant.audioTrackPublications.size);
+    console.log("[VoiceChat] participant identity:", localParticipant.identity);
+  }, [localParticipant, isMicrophoneEnabled]);
+
+  // Ensure microphone is enabled when connected
+  useEffect(() => {
+    if (!isMicrophoneEnabled) {
+      localParticipant.setMicrophoneEnabled(true).catch((err) => {
+        console.error("[VoiceChat] Failed to enable mic:", err);
+      });
+    }
+  }, [localParticipant, isMicrophoneEnabled]);
 
   const stateLabels: Record<string, string> = {
     disconnected: "Disconnected",
