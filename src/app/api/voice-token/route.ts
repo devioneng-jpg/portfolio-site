@@ -1,4 +1,4 @@
-import { AccessToken } from "livekit-server-sdk";
+import { AccessToken, AgentDispatchClient, RoomServiceClient } from "livekit-server-sdk";
 
 export async function POST() {
   const livekitUrl = process.env.LIVEKIT_URL;
@@ -14,6 +14,12 @@ export async function POST() {
 
   const participantName = `visitor-${Date.now()}`;
   const roomName = `devgpt-voice-${participantName}`;
+
+  const roomService = new RoomServiceClient(livekitUrl, apiKey, apiSecret);
+  await roomService.createRoom({ name: roomName });
+
+  const agentDispatch = new AgentDispatchClient(livekitUrl, apiKey, apiSecret);
+  await agentDispatch.createDispatch(roomName, "Kai-256b");
 
   const token = new AccessToken(apiKey, apiSecret, {
     identity: participantName,

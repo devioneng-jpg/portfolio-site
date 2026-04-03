@@ -77,15 +77,9 @@ function VoiceAssistantUI() {
         </p>
       </div>
 
-      <DisconnectButton>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2 border-destructive/50 text-destructive hover:bg-destructive/10"
-        >
-          <PhoneOff className="w-4 h-4" />
-          End Call
-        </Button>
+      <DisconnectButton className="inline-flex items-center justify-center gap-2 rounded-md border border-destructive/50 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer">
+        <PhoneOff className="w-4 h-4" />
+        End Call
       </DisconnectButton>
     </div>
   );
