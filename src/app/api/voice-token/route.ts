@@ -1,6 +1,6 @@
 import { AccessToken, AgentDispatchClient, RoomServiceClient } from "livekit-server-sdk";
 
-// Rate limiter: 5 requests/hr per IP
+// Rate limiter: 15 requests/hr per IP
 const rateLimit = new Map<string, { count: number; resetAt: number }>();
 
 function checkRateLimit(ip: string): boolean {
@@ -12,7 +12,7 @@ function checkRateLimit(ip: string): boolean {
     return true;
   }
 
-  if (window.count >= 5) {
+  if (window.count >= 15) {
     return false;
   }
 
