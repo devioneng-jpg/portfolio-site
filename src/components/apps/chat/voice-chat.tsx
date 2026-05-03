@@ -9,6 +9,7 @@ import {
   RoomAudioRenderer,
   DisconnectButton,
 } from "@livekit/components-react";
+import { Track } from "livekit-client";
 import "@livekit/components-styles";
 import { Mic, MicOff, Phone, PhoneOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ function VoiceAssistantUI() {
   // Debug mic status
   useEffect(() => {
     console.log("[VoiceChat] mic enabled:", isMicrophoneEnabled);
-    console.log("[VoiceChat] mic track:", localParticipant.getTrackPublication("microphone"));
+    console.log("[VoiceChat] mic track:", localParticipant.getTrackPublication(Track.Source.Microphone));
     console.log("[VoiceChat] audio tracks:", localParticipant.audioTrackPublications.size);
     console.log("[VoiceChat] participant identity:", localParticipant.identity);
   }, [localParticipant, isMicrophoneEnabled]);
