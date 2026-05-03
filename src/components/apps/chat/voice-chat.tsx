@@ -9,7 +9,6 @@ import {
   RoomAudioRenderer,
   DisconnectButton,
 } from "@livekit/components-react";
-import { Track } from "livekit-client";
 import "@livekit/components-styles";
 import { Mic, MicOff, Phone, PhoneOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,14 +22,6 @@ interface ConnectionDetails {
 function VoiceAssistantUI() {
   const { state, audioTrack } = useVoiceAssistant();
   const { localParticipant, isMicrophoneEnabled } = useLocalParticipant();
-
-  // Debug mic status
-  useEffect(() => {
-    console.log("[VoiceChat] mic enabled:", isMicrophoneEnabled);
-    console.log("[VoiceChat] mic track:", localParticipant.getTrackPublication(Track.Source.Microphone));
-    console.log("[VoiceChat] audio tracks:", localParticipant.audioTrackPublications.size);
-    console.log("[VoiceChat] participant identity:", localParticipant.identity);
-  }, [localParticipant, isMicrophoneEnabled]);
 
   // Ensure microphone is enabled when connected
   useEffect(() => {
@@ -92,7 +83,7 @@ function VoiceAssistantUI() {
         <p className="text-sm font-medium text-foreground">{stateLabel}</p>
         <p className="text-xs text-muted-foreground mt-1">
           {isActive
-            ? "Dev-GPT is ready to talk"
+            ? "Devion&apos;s AI Twin is ready to talk"
             : "Waiting for connection..."}
         </p>
       </div>
@@ -116,11 +107,10 @@ export function VoiceChat() {
     setError(null);
     try {
       const res = await fetch("/api/voice-token", { method: "POST" });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error ?? "Failed to get voice token");
       }
-      const data: ConnectionDetails = await res.json();
       setConnectionDetails(data);
     } catch (err) {
       setError(
@@ -168,10 +158,10 @@ export function VoiceChat() {
         </div>
         <div className="text-center">
           <p className="text-sm font-medium text-foreground">
-            Voice Chat with Dev-GPT
+            Voice Chat with Devion&apos;s AI Twin
           </p>
           <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
-            Talk to Dev-GPT using your microphone. Powered by ElevenLabs &
+            Talk to Devion&apos;s AI Twin using your microphone. Powered by ElevenLabs &
             LiveKit.
           </p>
         </div>

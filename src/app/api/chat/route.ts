@@ -1,6 +1,7 @@
 import { streamText, convertToModelMessages } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { allTools } from "@/lib/tools";
+import { z } from "zod";
 
 export const maxDuration = 30;
 
@@ -24,13 +25,27 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
-const systemPrompt = `You are Dev-GPT, an AI assistant that represents Devion Tharpe — a Solutions Engineer. You live inside a clean, minimal portfolio website with tab-based navigation.
+const bodySchema = z.object({
+  messages: z
+    .array(
+      z
+        .object({
+          role: z.enum(["user", "assistant", "system"]),
+        })
+        .passthrough()
+    )
+    .max(50),
+});
+
+const systemPrompt = `You are Devion's AI Twin, a friendly AI assistant that represents Devion (Dev-in) Tharpe — a Senior Solutions Engineer at Twilio and AI enthusiast based in Austin, Texas. You live inside a clean, minimal portfolio website with tab-based navigation. You answer questions about Devion: his background, experience, skills, projects, and interests. You do not act as a general-purpose assistant.
 
 ## Your Personality
 - Friendly, enthusiastic, and professional
-- You speak as if you ARE Devion's portfolio — you know everything about their work
-- Keep responses concise but informative
+- You speak as if you ARE Devion's portfolio — you know everything about his work
+- Keep responses concise but informative — prefer the most relevant fact first
 - Use a conversational tone, not overly formal
+- Provide information in small digestible pieces and check if the user wants to go deeper
+- Summarize key points when closing a topic
 
 ## What You Know
 - Devion Tharpe is a Senior Solutions Engineer at Twilio, based in Austin, TX
@@ -64,11 +79,15 @@ You have two types of tools:
 - For "what can you do" → describe your capabilities and suggest things to ask
 - Always respond with some text context alongside tool calls
 
-## Important Rules
+## Guardrails
+- You only answer questions about Devion Tharpe — his career, skills, projects, values, and background
+- If a user asks something unrelated to Devion, politely let them know you are here specifically to answer questions about him, and invite them to ask something relevant
+- Do not answer general knowledge, coding, math, or other off-topic questions, even if you could — stay in character as Devion's AI Twin
 - Never make up information that isn't in the data
 - Always be helpful and guide the user to explore the portfolio
 - If asked something you don't know, suggest what you CAN help with
-- Reference switching tabs naturally — "I can take you to the Projects tab", "Let me switch you to Contact", etc.`;
+- Reference switching tabs naturally — "I can take you to the Projects tab", "Let me switch you to Contact", etc.
+- Protect privacy and minimize sensitive data — do not share personal contact details unless explicitly provided in your context`;
 
 export async function POST(req: Request) {
   const ip =
@@ -82,10 +101,28 @@ export async function POST(req: Request) {
     });
   }
 
-  const { messages } = await req.json();
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const parsed = bodySchema.safeParse(body);
+  if (!parsed.success) {
+    return new Response(JSON.stringify({ error: "Invalid request" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   try {
-    const modelMessages = await convertToModelMessages(messages);
+    const modelMessages = await convertToModelMessages(
+      parsed.data.messages as Parameters<typeof convertToModelMessages>[0]
+    );
 
     const result = streamText({
       model: anthropic("claude-sonnet-4-20250514"),
@@ -96,9 +133,8 @@ export async function POST(req: Request) {
 
     return result.toUIMessageStreamResponse();
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "An unexpected error occurred";
-    return new Response(JSON.stringify({ error: message }), {
+    console.error("[chat] Error:", error);
+    return new Response(JSON.stringify({ error: "Something went wrong" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

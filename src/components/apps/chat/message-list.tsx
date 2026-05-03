@@ -27,7 +27,7 @@ export function MessageList({ messages, isLoading, error }: MessageListProps) {
           </div>
           <div>
             <h3 className="text-sm font-medium text-foreground/90">
-              Hey! I&apos;m Dev-GPT
+              Hey! I&apos;m Devion&apos;s AI Twin
             </h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
               Ask me anything about Devion&apos;s work, projects, skills, or

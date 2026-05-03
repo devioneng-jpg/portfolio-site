@@ -6,6 +6,11 @@ export interface SocialLink {
 
 export const socialLinks: SocialLink[] = [
   {
+    label: "GitHub",
+    url: "https://github.com/devioneng-jpg",
+    icon: "github",
+  },
+  {
     label: "LinkedIn",
     url: "https://linkedin.com/in/devion-tharpe",
     icon: "linkedin",
@@ -14,6 +19,11 @@ export const socialLinks: SocialLink[] = [
     label: "Email",
     url: "mailto:tharpedevion@gmail.com",
     icon: "mail",
+  },
+  {
+    label: "Calendly",
+    url: "https://calendly.com/tharpedevion/30min",
+    icon: "calendar",
   },
 ];
 

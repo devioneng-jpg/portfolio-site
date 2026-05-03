@@ -9,11 +9,11 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dev-GPT | Devion Tharpe",
+  title: "Devion's AI Twin | Devion Tharpe",
   description:
-    "An AI-powered developer portfolio. Chat with Dev-GPT to learn about Devion's work, projects, and skills.",
+    "An AI-powered developer portfolio. Chat with Devion's AI Twin to learn about Devion's work, projects, and skills.",
   openGraph: {
-    title: "Dev-GPT | Devion Tharpe",
+    title: "Devion's AI Twin | Devion Tharpe",
     description: "Chat with an AI that knows everything about Devion's work.",
     type: "website",
   },

@@ -1,13 +1,14 @@
 "use client";
 
 import { socialLinks, aboutMe } from "@/lib/data/social-links";
-import { Code, Briefcase, AtSign, Mail, MapPin, ExternalLink } from "lucide-react";
+import { Code, Briefcase, AtSign, Mail, MapPin, ExternalLink, Calendar } from "lucide-react";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   github: Code,
   linkedin: Briefcase,
   twitter: AtSign,
   mail: Mail,
+  calendar: Calendar,
 };
 
 export function ContactApp() {

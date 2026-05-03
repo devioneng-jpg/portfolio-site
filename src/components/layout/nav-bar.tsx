@@ -17,7 +17,7 @@ export function NavBar() {
   return (
     <nav className="glass sticky top-0 z-50 flex items-center justify-between px-6 py-3 rounded-none border-x-0 border-t-0">
       <span className="text-sm font-semibold tracking-tight text-foreground">
-        Dev-GPT
+        Devion&apos;s AI Twin
       </span>
 
       <div className="flex items-center gap-1">
