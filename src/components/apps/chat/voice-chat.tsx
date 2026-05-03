@@ -83,7 +83,7 @@ function VoiceAssistantUI() {
         <p className="text-sm font-medium text-foreground">{stateLabel}</p>
         <p className="text-xs text-muted-foreground mt-1">
           {isActive
-            ? "Devion&apos;s AI Twin is ready to talk"
+            ? "Devion's AI Twin is ready to talk"
             : "Waiting for connection..."}
         </p>
       </div>
