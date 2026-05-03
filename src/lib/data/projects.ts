@@ -12,7 +12,7 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    id: "dev-gpt",
+    id: "devions-ai-twin",
     title: "Devion's AI Twin Portfolio",
     description:
       "An AI-powered portfolio site with a conversational interface. Chat with an AI that knows everything about my career and work.",
