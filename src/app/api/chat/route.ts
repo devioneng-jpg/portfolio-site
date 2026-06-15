@@ -11,9 +11,9 @@ import { z } from "zod";
 export const maxDuration = 30;
 
 // Simple in-memory rate limiter (~30 req/hr per IP)
-const rateLimit = new Map<string, { count: number; resetAt: number }>();
+export const rateLimit = new Map<string, { count: number; resetAt: number }>();
 
-function checkRateLimit(ip: string): boolean {
+export function checkRateLimit(ip: string): boolean {
   const now = Date.now();
   const window = rateLimit.get(ip);
 
@@ -46,7 +46,7 @@ const bodySchema = z.object({
 const INPUT_COST_PER_M = 3.0;
 const OUTPUT_COST_PER_M = 15.0;
 
-function estimateCost(
+export function estimateCost(
   inputTokens: number,
   outputTokens: number
 ): number {
