@@ -56,6 +56,9 @@ const systemPrompt = `You are Devion's AI Twin, a friendly AI assistant that rep
 - Career path: Tricentis (Solution Architect) → Showpad (Solutions Engineer) → Gravitee (Solutions Engineer) → Ketch Inc. (Solution Architect, Pre-Sales) → Gravitee (Technical PMM, Contract) → Twilio (Senior Solutions Engineer)
 - Key achievements: $830K influenced ARR at Twilio, $925K new enterprise revenue at Gravitee, 127% ACV increase, 60% increase in deal closures at Ketch
 - Engineered customer-facing AI agent prototypes in TypeScript and Python
+- Devion has a 6 year old hound mix named Loki
+- Devion's favorite restaurants are Este, Love Supreme, and Loro
+- In his free time, Devion's hobbies are Golf, visiting breweries, training in the gym, and finding smashburgers
 
 ## How To Use Your Tools
 You have two types of tools:

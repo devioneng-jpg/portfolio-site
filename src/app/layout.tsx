@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: "Devion's AI Twin | Devion Tharpe",
   description:
     "An AI-powered developer portfolio. Chat with Devion's AI Twin to learn about Devion's work, projects, and skills.",
+  robots: {
+    index: false,
+    follow: false,
+  },
   openGraph: {
     title: "Devion's AI Twin | Devion Tharpe",
     description: "Chat with an AI that knows everything about Devion's work.",
