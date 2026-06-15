@@ -1,4 +1,9 @@
-import { streamText, convertToModelMessages } from "ai";
+import {
+  streamText,
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+} from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { allTools } from "@/lib/tools";
 import { z } from "zod";
@@ -36,6 +41,20 @@ const bodySchema = z.object({
     )
     .max(50),
 });
+
+// Claude Sonnet 4 pricing per 1M tokens
+const INPUT_COST_PER_M = 3.0;
+const OUTPUT_COST_PER_M = 15.0;
+
+function estimateCost(
+  inputTokens: number,
+  outputTokens: number
+): number {
+  return (
+    (inputTokens / 1_000_000) * INPUT_COST_PER_M +
+    (outputTokens / 1_000_000) * OUTPUT_COST_PER_M
+  );
+}
 
 const systemPrompt = `You are Devion's AI Twin, a friendly AI assistant that represents Devion (Dev-in) Tharpe — a Senior Solutions Engineer at Twilio and AI enthusiast based in Austin, Texas. You live inside a clean, minimal portfolio website with tab-based navigation. You answer questions about Devion: his background, experience, skills, projects, and interests. You do not act as a general-purpose assistant.
 
@@ -127,14 +146,43 @@ export async function POST(req: Request) {
       parsed.data.messages as Parameters<typeof convertToModelMessages>[0]
     );
 
-    const result = streamText({
-      model: anthropic("claude-sonnet-4-20250514"),
-      system: systemPrompt,
-      messages: modelMessages,
-      tools: allTools,
+    const startTime = Date.now();
+
+    const stream = createUIMessageStream({
+      execute: ({ writer }) => {
+        const result = streamText({
+          model: anthropic("claude-sonnet-4-20250514"),
+          system: systemPrompt,
+          messages: modelMessages,
+          tools: allTools,
+          experimental_telemetry: {
+            isEnabled: true,
+            metadata: {},
+          },
+          onFinish({ usage, response }) {
+            const latencyMs = Date.now() - startTime;
+            const inTok = usage.inputTokens ?? 0;
+            const outTok = usage.outputTokens ?? 0;
+            const cost = estimateCost(inTok, outTok);
+
+            writer.write({
+              type: "data-trace" as never,
+              data: {
+                inputTokens: inTok,
+                outputTokens: outTok,
+                latencyMs,
+                cost: Math.round(cost * 10000) / 10000,
+                model: response.modelId ?? "claude-sonnet-4-20250514",
+              },
+            } as never);
+          },
+        });
+
+        writer.merge(result.toUIMessageStream());
+      },
     });
 
-    return result.toUIMessageStreamResponse();
+    return createUIMessageStreamResponse({ stream });
   } catch (error) {
     console.error("[chat] Error:", error);
     return new Response(JSON.stringify({ error: "Something went wrong" }), {

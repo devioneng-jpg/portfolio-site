@@ -5,6 +5,7 @@ import { Bot, User, ArrowRight, Calendar } from "lucide-react";
 import { ProjectCardsInline } from "./tool-renderers/project-cards-inline";
 import { SkillBadgesInline } from "./tool-renderers/skill-badges-inline";
 import { ExperienceInline } from "./tool-renderers/experience-inline";
+import { TraceStrip } from "./trace-strip";
 
 interface MessageBubbleProps {
   message: UIMessage;
@@ -100,6 +101,31 @@ function renderToolPart(part: UIMessage["parts"][number], index: number) {
 export function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === "user";
 
+  // Extract trace data from data parts
+  const tracePart = !isUser
+    ? message.parts.find(
+        (p) => (p as { type: string }).type === "data-trace"
+      )
+    : null;
+  const traceData = tracePart
+    ? (tracePart as { type: string; data: Record<string, unknown> }).data
+    : null;
+
+  // Collect tool call names for the trace strip
+  const toolCalls = !isUser
+    ? message.parts
+        .filter(
+          (p) =>
+            p.type.startsWith("tool-") || p.type === "dynamic-tool"
+        )
+        .map((p) => {
+          if (p.type === "dynamic-tool") {
+            return (p as { toolName: string }).toolName;
+          }
+          return p.type.slice(5);
+        })
+    : [];
+
   return (
     <div
       className={`flex gap-2 items-start ${isUser ? "flex-row-reverse" : ""}`}
@@ -138,12 +164,30 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             );
           }
 
+          if (part.type === "data-trace") {
+            return null; // rendered separately below
+          }
+
           if (part.type.startsWith("tool-") || part.type === "dynamic-tool") {
             return renderToolPart(part, i);
           }
 
           return null;
         })}
+
+        {traceData && (
+          <TraceStrip
+            data={{
+              inputTokens: traceData.inputTokens as number,
+              outputTokens: traceData.outputTokens as number,
+              latencyMs: traceData.latencyMs as number,
+              cost: traceData.cost as number,
+              model: traceData.model as string,
+              traceUrl: traceData.traceUrl as string | undefined,
+              toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+            }}
+          />
+        )}
       </div>
     </div>
   );
