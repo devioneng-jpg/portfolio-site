@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
-import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { useTabStore, type TabId } from "@/stores/tab-store";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
@@ -25,7 +24,6 @@ export function ChatApp() {
         setActiveTab(tabId);
       }
     },
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
   });
 
   const isLoading =
