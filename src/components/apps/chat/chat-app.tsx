@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
+import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { useTabStore, type TabId } from "@/stores/tab-store";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
@@ -24,14 +25,7 @@ export function ChatApp() {
         setActiveTab(tabId);
       }
     },
-    sendAutomaticallyWhen({ messages }) {
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage?.role !== "assistant") return false;
-      const hasToolParts = lastMessage.parts.some(
-        (p) => p.type.startsWith("tool-") || p.type === "dynamic-tool"
-      );
-      return hasToolParts;
-    },
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
   });
 
   const isLoading =
