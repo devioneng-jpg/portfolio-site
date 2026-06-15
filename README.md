@@ -26,6 +26,8 @@ voice mode.
   Anthropic Claude; tool calls drive inline UI and tab switching
 - **Voice**: LiveKit (`livekit-client`, `@livekit/components-react`,
   `livekit-server-sdk`)
+- **Observability**: Langfuse via OpenTelemetry (`@langfuse/otel`) — traces
+  every LLM call with token usage & latency
 - **Validation**: Zod 4
 - **Animation**: Motion (Framer Motion successor)
 - **Windows**: `react-rnd` for draggable/resizable surfaces
@@ -49,6 +51,12 @@ Create a `.env.local` in the repo root:
 # Required for /api/chat
 ANTHROPIC_API_KEY=sk-ant-...
 
+# Optional — Langfuse tracing (works without, just no observability)
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_BASEURL=https://cloud.langfuse.com
+LANGFUSE_PROJECT_ID=...          # used to build trace URLs in the UI
+
 # Required for voice mode (/api/voice-token + browser client)
 LIVEKIT_API_KEY=...
 LIVEKIT_API_SECRET=...
@@ -66,7 +74,21 @@ pnpm dev          # next dev
 pnpm build        # next build
 pnpm start        # next start (after build)
 pnpm lint         # eslint
+pnpm test         # vitest (run once)
+pnpm test:watch   # vitest in watch mode
 ```
+
+## Testing
+
+Tests use [Vitest](https://vitest.dev/) and live alongside source code in
+`__tests__/` directories:
+
+- `src/lib/__tests__/tools.test.ts` — tool execute functions (projects,
+  skills, experience, about, bookMeeting, tab-switch)
+- `src/app/api/chat/__tests__/route.test.ts` — rate limiter logic and cost
+  estimation
+
+Run `pnpm test` to execute them.
 
 ## Project layout
 
@@ -116,8 +138,8 @@ a system prompt describing Devion plus a set of tools defined in
 - **Inline tools** (`showProjects`, `showSkills`, `showExperience`,
   `showAbout`) render structured cards directly in the chat thread via
   renderers in `components/apps/chat/tool-renderers/`.
-- **Tab-switching tools** (`switchToProjects`, `switchToContact`,
-  `switchToResume`) call into the Zustand tab store to navigate the OS shell.
+- **Tab-switching tools** (`switchToContact`, `switchToResume`) render a
+  clickable "Go to X" button inline so users navigate on their own terms.
 
 A simple in-memory rate limiter caps usage at ~30 requests/hour per IP.
 
