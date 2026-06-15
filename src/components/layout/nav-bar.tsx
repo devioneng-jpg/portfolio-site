@@ -1,11 +1,10 @@
 "use client";
 
 import { useTabStore, type TabId } from "@/stores/tab-store";
-import { MessageSquare, FolderOpen, FileText, Mail } from "lucide-react";
+import { MessageSquare, FileText, Mail } from "lucide-react";
 
 const tabs: { id: TabId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "chat", label: "Chat", icon: MessageSquare },
-  { id: "projects", label: "Projects", icon: FolderOpen },
   { id: "resume", label: "Resume", icon: FileText },
   { id: "contact", label: "Contact", icon: Mail },
 ];

@@ -51,15 +51,6 @@ export const showAbout = tool({
 });
 
 // Tab-switching tools — navigate to different sections
-export const switchToProjects = tool({
-  description:
-    "Switch to the Projects tab to show the full project gallery. Use when user wants to browse all projects in detail or says 'show me everything'.",
-  inputSchema: z.object({}),
-  execute: async () => {
-    return { tab: "projects", label: "Projects" };
-  },
-});
-
 export const switchToContact = tool({
   description:
     "Switch to the Contact tab with social links and email. Use when user asks how to reach you, contact info, or wants to connect.",
@@ -78,12 +69,46 @@ export const switchToResume = tool({
   },
 });
 
+export const bookMeeting = tool({
+  description:
+    "Show a Calendly booking link so the user can schedule a meeting with Devion. Use when user wants to book a call, schedule a meeting, chat live, or connect. Pass any details the user provides (name, email, date/time) to pre-fill the booking form. For date_time, convert the user's request to ISO 8601 format (e.g. '2026-06-17T15:30:00').",
+  inputSchema: z.object({
+    name: z.string().optional().describe("User's full name if provided"),
+    email: z.string().optional().describe("User's email if provided"),
+    date_time: z
+      .string()
+      .optional()
+      .describe(
+        "Requested date/time in ISO 8601 format (e.g. 2026-06-17T15:30:00)"
+      ),
+  }),
+  execute: async ({ name, email, date_time }) => {
+    const base = "https://calendly.com/tharpedevion/30min";
+    const params = new URLSearchParams();
+    if (name) params.set("name", name);
+    if (email) params.set("email", email);
+    if (date_time) {
+      const d = new Date(date_time);
+      params.set("month", `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+      params.set("date", date_time.split("T")[0]);
+    }
+    const query = params.toString();
+    const url = query ? `${base}?${query}` : base;
+    return {
+      url,
+      label: date_time
+        ? `Book a 30-min meeting with Devion — click to confirm`
+        : "Book a 30-min meeting with Devion",
+    };
+  },
+});
+
 export const allTools = {
   showProjects,
   showSkills,
   showExperience,
   showAbout,
-  switchToProjects,
+  bookMeeting,
   switchToContact,
   switchToResume,
 };

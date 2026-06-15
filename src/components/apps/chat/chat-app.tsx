@@ -16,7 +16,6 @@ export function ChatApp() {
   const { messages, sendMessage, status, error } = useChat({
     onToolCall({ toolCall }) {
       const tabTools: Record<string, TabId> = {
-        switchToProjects: "projects",
         switchToContact: "contact",
         switchToResume: "resume",
       };

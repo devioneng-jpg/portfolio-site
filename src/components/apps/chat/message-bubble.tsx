@@ -1,7 +1,7 @@
 "use client";
 
 import type { UIMessage } from "ai";
-import { Bot, User, ArrowRight } from "lucide-react";
+import { Bot, User, ArrowRight, Calendar } from "lucide-react";
 import { ProjectCardsInline } from "./tool-renderers/project-cards-inline";
 import { SkillBadgesInline } from "./tool-renderers/skill-badges-inline";
 import { ExperienceInline } from "./tool-renderers/experience-inline";
@@ -60,7 +60,25 @@ function renderToolPart(part: UIMessage["parts"][number], index: number) {
         </div>
       );
     }
-    case "switchToProjects":
+    case "bookMeeting": {
+      const meeting = output as { url: string; label: string };
+      return (
+        <div
+          key={index}
+          className="bg-primary/5 rounded-lg p-3 border border-primary/15"
+        >
+          <a
+            href={meeting.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+          >
+            <Calendar className="w-4 h-4" />
+            {meeting.label}
+          </a>
+        </div>
+      );
+    }
     case "switchToContact":
     case "switchToResume": {
       const result = output as { tab?: string; label?: string } | null;
