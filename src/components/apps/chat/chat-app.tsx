@@ -2,29 +2,16 @@
 
 import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
-import { useTabStore, type TabId } from "@/stores/tab-store";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
 import { ChatModeToggle, type ChatMode } from "./chat-mode-toggle";
 import { VoiceChat } from "./voice-chat";
 
 export function ChatApp() {
-  const setActiveTab = useTabStore((s) => s.setActiveTab);
   const [input, setInput] = useState("");
   const [mode, setMode] = useState<ChatMode>("text");
 
-  const { messages, sendMessage, status, error } = useChat({
-    onToolCall({ toolCall }) {
-      const tabTools: Record<string, TabId> = {
-        switchToContact: "contact",
-        switchToResume: "resume",
-      };
-      const tabId = tabTools[toolCall.toolName];
-      if (tabId) {
-        setActiveTab(tabId);
-      }
-    },
-  });
+  const { messages, sendMessage, status, error } = useChat({});
 
   const isLoading =
     !error && (status === "streaming" || status === "submitted");

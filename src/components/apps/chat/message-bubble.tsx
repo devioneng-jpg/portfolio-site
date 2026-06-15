@@ -2,6 +2,7 @@
 
 import type { UIMessage } from "ai";
 import { Bot, User, ArrowRight, Calendar } from "lucide-react";
+import { useTabStore, type TabId } from "@/stores/tab-store";
 import { ProjectCardsInline } from "./tool-renderers/project-cards-inline";
 import { SkillBadgesInline } from "./tool-renderers/skill-badges-inline";
 import { ExperienceInline } from "./tool-renderers/experience-inline";
@@ -84,18 +85,29 @@ function renderToolPart(part: UIMessage["parts"][number], index: number) {
     case "switchToResume": {
       const result = output as { tab?: string; label?: string } | null;
       return (
-        <div
+        <TabSwitchButton
           key={index}
-          className="flex items-center gap-2 text-[11px] text-primary/70 bg-primary/5 rounded-lg px-3 py-2 border border-primary/15"
-        >
-          <ArrowRight className="w-3 h-3" />
-          <span>Switched to {result?.label ?? toolName}</span>
-        </div>
+          tab={result?.tab as TabId | undefined}
+          label={result?.label ?? toolName}
+        />
       );
     }
     default:
       return null;
   }
+}
+
+function TabSwitchButton({ tab, label }: { tab?: TabId; label: string }) {
+  const setActiveTab = useTabStore((s) => s.setActiveTab);
+  return (
+    <button
+      onClick={() => tab && setActiveTab(tab)}
+      className="flex items-center gap-2 text-[11px] text-primary/70 bg-primary/5 rounded-lg px-3 py-2 border border-primary/15 hover:bg-primary/10 transition-colors cursor-pointer"
+    >
+      <ArrowRight className="w-3 h-3" />
+      <span>Go to {label}</span>
+    </button>
+  );
 }
 
 export function MessageBubble({ message }: MessageBubbleProps) {
