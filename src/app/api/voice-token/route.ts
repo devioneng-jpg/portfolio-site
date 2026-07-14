@@ -1,61 +1,79 @@
 import { AccessToken, AgentDispatchClient, RoomServiceClient } from "livekit-server-sdk";
-
-// Rate limiter: 15 requests/hr per IP
-const rateLimit = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const window = rateLimit.get(ip);
-
-  if (!window || now > window.resetAt) {
-    rateLimit.set(ip, { count: 1, resetAt: now + 3600000 });
-    return true;
-  }
-
-  if (window.count >= 15) {
-    return false;
-  }
-
-  window.count++;
-  return true;
-}
+import {
+  checkRateLimit,
+  getClientIdentifier,
+} from "@/lib/rate-limit";
+import { BOOKING_URL } from "@/lib/booking";
 
 export async function POST(req: Request) {
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown";
+  if (!isAllowedOrigin(req)) {
+    return Response.json({ error: "Origin is not allowed" }, { status: 403 });
+  }
 
-  if (!checkRateLimit(ip)) {
-    return new Response(
-      JSON.stringify({ error: "Rate limit exceeded. Try again later." }),
-      { status: 429, headers: { "Content-Type": "application/json" } }
+  const limit = await checkRateLimit({
+    scope: "voice",
+    identifier: getClientIdentifier(req),
+    limit: 15,
+    windowSeconds: 3600,
+  });
+  if (!limit.configured) {
+    return Response.json(
+      { error: "Voice chat is temporarily unavailable" },
+      { status: 503 }
+    );
+  }
+  if (!limit.success) {
+    return Response.json(
+      { error: "Rate limit exceeded. Try again later." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      }
     );
   }
 
   const livekitUrl = process.env.LIVEKIT_URL;
   const apiKey = process.env.LIVEKIT_API_KEY;
   const apiSecret = process.env.LIVEKIT_API_SECRET;
+  const agentName = process.env.LIVEKIT_AGENT_NAME;
 
-  if (!livekitUrl || !apiKey || !apiSecret) {
-    return new Response(
-      JSON.stringify({ error: "Voice chat is not configured" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+  if (!livekitUrl || !apiKey || !apiSecret || !agentName) {
+    return Response.json(
+      { error: "Voice chat is not configured" },
+      { status: 503 }
     );
   }
 
-  const participantName = `visitor-${Date.now()}`;
-  const roomName = `devgpt-voice-${participantName}`;
+  const sessionId = crypto.randomUUID();
+  const participantName = `visitor-${sessionId}`;
+  const roomName = `ai-twin-${sessionId}`;
+  const roomService = new RoomServiceClient(livekitUrl, apiKey, apiSecret);
 
   try {
-    const roomService = new RoomServiceClient(livekitUrl, apiKey, apiSecret);
-    await roomService.createRoom({ name: roomName });
+    await roomService.createRoom({
+      name: roomName,
+      emptyTimeout: 60,
+      departureTimeout: 20,
+      maxParticipants: 2,
+    });
 
     const agentDispatch = new AgentDispatchClient(livekitUrl, apiKey, apiSecret);
-    await agentDispatch.createDispatch(roomName, "Kai-256b");
+    await agentDispatch.createDispatch(roomName, agentName, {
+      metadata: JSON.stringify({
+        tools: {
+          bookMeeting: {
+            url: BOOKING_URL,
+            label: "Choose a 15- or 30-minute meeting with Devion",
+            instruction:
+              "When the visitor asks to schedule time, offer this booking link.",
+          },
+        },
+      }),
+    });
 
     const token = new AccessToken(apiKey, apiSecret, {
       identity: participantName,
+      ttl: "10m",
     });
 
     token.addGrant({
@@ -67,19 +85,33 @@ export async function POST(req: Request) {
 
     const jwt = await token.toJwt();
 
-    return new Response(
-      JSON.stringify({
+    return Response.json(
+      {
         token: jwt,
         url: livekitUrl,
         roomName,
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+        bookingUrl: BOOKING_URL,
+      },
+      { status: 200 }
     );
   } catch (err) {
     console.error("[voice-token] Error:", err);
-    return new Response(
-      JSON.stringify({ error: "Failed to create voice session" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+    await roomService.deleteRoom(roomName).catch(() => undefined);
+    return Response.json(
+      { error: "Failed to create voice session" },
+      { status: 500 }
     );
   }
+}
+
+function isAllowedOrigin(request: Request): boolean {
+  if (process.env.NODE_ENV !== "production") return true;
+
+  const origin = request.headers.get("origin");
+  const allowedOrigins = [
+    process.env.APP_URL,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+  ].filter((value): value is string => Boolean(value));
+
+  return Boolean(origin && allowedOrigins.includes(origin));
 }

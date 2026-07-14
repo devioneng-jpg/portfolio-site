@@ -1,25 +1,41 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
-const mono = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-});
+const siteUrl =
+  process.env.APP_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Devion's AI Twin | Devion Tharpe",
   description:
-    "An AI-powered developer portfolio. Chat with Devion's AI Twin to learn about Devion's work, projects, and skills.",
+    "Explore Senior Solutions Engineer Devion Tharpe's AI case studies, experience, and technical approach through an interactive portfolio.",
+  keywords: [
+    "Devion Tharpe",
+    "Senior Solutions Engineer",
+    "AI agents",
+    "Solutions Engineering",
+    "Austin",
+  ],
+  authors: [{ name: "Devion Tharpe" }],
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
   },
   openGraph: {
     title: "Devion's AI Twin | Devion Tharpe",
-    description: "Chat with an AI that knows everything about Devion's work.",
+    description:
+      "See how Devion turns customer problems into production-minded AI solutions.",
     type: "website",
+    url: "/",
+    siteName: "Devion's AI Twin",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Devion's AI Twin | Senior Solutions Engineer",
+    description:
+      "AI case studies, architecture, and experience from Devion Tharpe.",
   },
 };
 
@@ -31,7 +47,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${mono.variable} dark h-full antialiased`}
+      className="dark h-full antialiased"
       suppressHydrationWarning
     >
       <body className="h-full">

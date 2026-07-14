@@ -4,6 +4,7 @@ import { projects } from "./data/projects";
 import { skillCategories } from "./data/skills";
 import { experiences } from "./data/experience";
 import { aboutMe } from "./data/social-links";
+import { createBookingUrl } from "./booking";
 
 // Inline tools — render components inside chat
 export const showProjects = tool({
@@ -60,6 +61,15 @@ export const switchToContact = tool({
   },
 });
 
+export const switchToProjects = tool({
+  description:
+    "Offer a button to open the Projects tab for detailed Solutions Engineering case studies. Use when the user wants to explore project architecture, customer problems, business value, or production considerations.",
+  inputSchema: z.object({}),
+  execute: async () => {
+    return { tab: "projects", label: "Projects" };
+  },
+});
+
 export const switchToResume = tool({
   description:
     "Switch to the Resume tab. Use when user asks for a resume, CV, or formal overview of qualifications.",
@@ -71,34 +81,15 @@ export const switchToResume = tool({
 
 export const bookMeeting = tool({
   description:
-    "Show a Calendly booking link so the user can schedule a meeting with Devion. Use when user wants to book a call, schedule a meeting, chat live, or connect. Pass any details the user provides (name, email, date/time) to pre-fill the booking form. For date_time, convert the user's request to ISO 8601 format (e.g. '2026-06-17T15:30:00').",
+    "Show Devion's Cal.com booking link so the user can choose a 15- or 30-minute meeting. Use when the user wants to book a call, schedule a meeting, chat live, or connect. Pass a name or email when provided to pre-fill the booking form.",
   inputSchema: z.object({
     name: z.string().optional().describe("User's full name if provided"),
-    email: z.string().optional().describe("User's email if provided"),
-    date_time: z
-      .string()
-      .optional()
-      .describe(
-        "Requested date/time in ISO 8601 format (e.g. 2026-06-17T15:30:00)"
-      ),
+    email: z.email().optional().describe("User's email if provided"),
   }),
-  execute: async ({ name, email, date_time }) => {
-    const base = "https://calendly.com/tharpedevion/30min";
-    const params = new URLSearchParams();
-    if (name) params.set("name", name);
-    if (email) params.set("email", email);
-    if (date_time) {
-      const d = new Date(date_time);
-      params.set("month", `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-      params.set("date", date_time.split("T")[0]);
-    }
-    const query = params.toString();
-    const url = query ? `${base}?${query}` : base;
+  execute: async ({ name, email }) => {
     return {
-      url,
-      label: date_time
-        ? `Book a 30-min meeting with Devion — click to confirm`
-        : "Book a 30-min meeting with Devion",
+      url: createBookingUrl({ name, email }),
+      label: "Choose a 15- or 30-minute meeting with Devion",
     };
   },
 });
@@ -109,6 +100,7 @@ export const allTools = {
   showExperience,
   showAbout,
   bookMeeting,
+  switchToProjects,
   switchToContact,
   switchToResume,
 };

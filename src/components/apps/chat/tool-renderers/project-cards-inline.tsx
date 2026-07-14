@@ -10,16 +10,19 @@ interface ProjectCardsInlineProps {
 
 export function ProjectCardsInline({ projects }: ProjectCardsInlineProps) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+    <div
+      className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin"
+      aria-label="Project previews"
+    >
       {projects.map((project) => (
         <div
           key={project.id}
-          className="min-w-[200px] max-w-[220px] bg-card rounded-lg p-3 border border-border shrink-0"
+          className="min-w-[230px] max-w-[260px] bg-card rounded-lg p-3 border border-border shrink-0"
         >
           <h4 className="text-xs font-semibold text-foreground/90 mb-1">
             {project.title}
           </h4>
-          <p className="text-[10px] text-muted-foreground mb-2 line-clamp-2">
+          <p className="text-[10px] text-muted-foreground mb-2 line-clamp-3">
             {project.description}
           </p>
           <div className="flex flex-wrap gap-1 mb-2">
@@ -39,6 +42,7 @@ export function ProjectCardsInline({ projects }: ProjectCardsInlineProps) {
                 href={project.github}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={`View ${project.title} source code`}
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 <Code className="w-3 h-3" />
@@ -49,6 +53,7 @@ export function ProjectCardsInline({ projects }: ProjectCardsInlineProps) {
                 href={project.live}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={`Open ${project.title} live demo`}
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 <ExternalLink className="w-3 h-3" />

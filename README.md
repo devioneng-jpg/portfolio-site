@@ -1,20 +1,19 @@
-# Dev-GPT — Devion Tharpe's Portfolio
+# Devion's AI Twin — Devion Tharpe's Portfolio
 
 A personal portfolio for **Devion Tharpe** (Senior Solutions Engineer, Twilio)
-styled as an OS/desktop with tab-based "apps." The centerpiece is **Dev-GPT**,
+with tab-based experiences. The centerpiece is **Devion's AI Twin**,
 an AI assistant that knows Devion's background and can answer questions,
-render structured results inline (project cards, skill badges, experience
-timeline), or switch tabs to a fuller view — including a LiveKit-powered
-voice mode.
+render structured results inline, or offer navigation to detailed case studies,
+resume, and contact views — including a LiveKit-powered voice mode.
 
 ## Apps
 
 | Tab | Description |
 |-----|-------------|
 | **Resume** | Formal resume view (`components/apps/resume`) |
-| **Projects** | Project gallery with cards (`components/apps/projects`) |
+| **Projects** | Solutions Engineering case studies sourced from public work (`components/apps/projects`) |
 | **Chat** | Streaming AI chat with tool calls + voice mode (`components/apps/chat`) |
-| **Contact** | Contact form / social links (`components/apps/contact`) |
+| **Contact** | Social, email, and Cal.com links (`components/apps/contact`) |
 
 ## Tech stack
 
@@ -29,8 +28,6 @@ voice mode.
 - **Observability**: Langfuse via OpenTelemetry (`@langfuse/otel`) — traces
   every LLM call with token usage & latency
 - **Validation**: Zod 4
-- **Animation**: Motion (Framer Motion successor)
-- **Windows**: `react-rnd` for draggable/resizable surfaces
 
 ## Getting started
 
@@ -50,18 +47,28 @@ Create a `.env.local` in the repo root:
 ```bash
 # Required for /api/chat
 ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_MODEL=claude-sonnet-4-20250514
+
+# Required in production for shared API rate limiting
+UPSTASH_REDIS_REST_URL=...
+UPSTASH_REDIS_REST_TOKEN=...
+RATE_LIMIT_SALT=...
+
+# Public deployment URL
+APP_URL=https://your-domain.example
 
 # Optional — Langfuse tracing (works without, just no observability)
 LANGFUSE_SECRET_KEY=sk-lf-...
 LANGFUSE_PUBLIC_KEY=pk-lf-...
 LANGFUSE_BASEURL=https://cloud.langfuse.com
 LANGFUSE_PROJECT_ID=...          # used to build trace URLs in the UI
+NEXT_PUBLIC_SHOW_AI_TRACE=false  # opt-in response diagnostics
 
 # Required for voice mode (/api/voice-token + browser client)
 LIVEKIT_API_KEY=...
 LIVEKIT_API_SECRET=...
 LIVEKIT_URL=wss://your-project.livekit.cloud
-NEXT_PUBLIC_LIVEKIT_URL=wss://your-project.livekit.cloud
+LIVEKIT_AGENT_NAME=your-deployed-agent
 ```
 
 The chat tab works without LiveKit; voice mode requires all four LiveKit
@@ -76,6 +83,7 @@ pnpm start        # next start (after build)
 pnpm lint         # eslint
 pnpm test         # vitest (run once)
 pnpm test:watch   # vitest in watch mode
+pnpm test:e2e     # Playwright desktop + mobile smoke tests
 ```
 
 ## Testing
@@ -86,9 +94,15 @@ Tests use [Vitest](https://vitest.dev/) and live alongside source code in
 - `src/lib/__tests__/tools.test.ts` — tool execute functions (projects,
   skills, experience, about, bookMeeting, tab-switch)
 - `src/app/api/chat/__tests__/route.test.ts` — rate limiter logic and cost
-  estimation
+  estimation plus chat request validation
+- `src/app/api/voice-token/__tests__/route.test.ts` — voice configuration,
+  short-lived room issuance, and abuse limits
+- `tests/e2e/portfolio.spec.ts` — desktop/mobile navigation and keyboard smoke
+  coverage
 
-Run `pnpm test` to execute them.
+Run `pnpm test` for unit/integration coverage. Install Chromium once with
+`pnpm test:e2e:install`, then run `pnpm test:e2e`. GitHub Actions runs lint,
+tests, production build, and browser smoke coverage for pull requests.
 
 ## Project layout
 
@@ -131,23 +145,20 @@ Edit there, not inline in components.
 
 ## How Dev-GPT works
 
-`/api/chat` streams from Anthropic via the Vercel AI SDK. The model is given
-a system prompt describing Devion plus a set of tools defined in
-`src/lib/tools.ts`:
+`/api/chat` streams from Anthropic via the Vercel AI SDK. The model is givena system prompt describing Devion plus a set of tools defined in `src/lib/tools.ts`:
 
 - **Inline tools** (`showProjects`, `showSkills`, `showExperience`,
   `showAbout`) render structured cards directly in the chat thread via
   renderers in `components/apps/chat/tool-renderers/`.
-- **Tab-switching tools** (`switchToContact`, `switchToResume`) render a
+- **Tab-switching tools** (`switchToProjects`, `switchToContact`,
+  `switchToResume`) render a
   clickable "Go to X" button inline so users navigate on their own terms.
 
-A simple in-memory rate limiter caps usage at ~30 requests/hour per IP.
+A shared Upstash-backed rate limiter caps chat usage at ~30 requests/hour per visitor. Local development uses an in-memory fallback; production fails closedwhen durable limiting is not configured.
 
 ## Deployment
 
-Designed to deploy cleanly to Vercel. Set the environment variables above in
-the project's dashboard, then push to your default branch. For voice mode,
-provision a LiveKit Cloud project and copy the credentials.
+Designed to deploy cleanly to Vercel. Set the environment variables above inthe project's dashboard, then push to your default branch. For voice mode,provision a LiveKit Cloud project and copy the credentials.
 
 ## License
 

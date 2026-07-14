@@ -14,7 +14,7 @@ interface TraceData {
 }
 
 export function TraceStrip({ data }: { data: TraceData }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   const modelShort = data.model
     .replace("claude-", "")
@@ -23,7 +23,10 @@ export function TraceStrip({ data }: { data: TraceData }) {
   return (
     <div className="mt-1.5">
       <button
+        type="button"
         onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+        aria-label={expanded ? "Hide AI response trace" : "Show AI response trace"}
         className="flex items-center gap-1 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
       >
         {expanded ? (

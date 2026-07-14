@@ -1,18 +1,18 @@
 "use client";
 
-import type { UIMessage } from "ai";
 import { Bot, User, ArrowRight, Calendar } from "lucide-react";
 import { useTabStore, type TabId } from "@/stores/tab-store";
+import type { PortfolioMessage } from "@/lib/chat-types";
 import { ProjectCardsInline } from "./tool-renderers/project-cards-inline";
 import { SkillBadgesInline } from "./tool-renderers/skill-badges-inline";
 import { ExperienceInline } from "./tool-renderers/experience-inline";
 import { TraceStrip } from "./trace-strip";
 
 interface MessageBubbleProps {
-  message: UIMessage;
+  message: PortfolioMessage;
 }
 
-function renderToolPart(part: UIMessage["parts"][number], index: number) {
+function renderToolPart(part: PortfolioMessage["parts"][number], index: number) {
   const toolType = part.type;
 
   let toolName: string;
@@ -52,7 +52,7 @@ function renderToolPart(part: UIMessage["parts"][number], index: number) {
       return (
         <div
           key={index}
-          className="bg-muted/50 rounded-lg p-3 text-sm text-foreground/80 border border-border"
+          className="rounded-xl border border-border bg-card p-3 text-sm text-foreground/80"
         >
           <p className="font-medium text-foreground/90 mb-1">{about.name}</p>
           <p className="text-xs text-muted-foreground mb-2">
@@ -67,7 +67,7 @@ function renderToolPart(part: UIMessage["parts"][number], index: number) {
       return (
         <div
           key={index}
-          className="bg-primary/5 rounded-lg p-3 border border-primary/15"
+          className="rounded-xl border border-primary/20 bg-primary/5 p-3"
         >
           <a
             href={meeting.url}
@@ -81,6 +81,7 @@ function renderToolPart(part: UIMessage["parts"][number], index: number) {
         </div>
       );
     }
+    case "switchToProjects":
     case "switchToContact":
     case "switchToResume": {
       const result = output as { tab?: string; label?: string } | null;
@@ -102,7 +103,7 @@ function TabSwitchButton({ tab, label }: { tab?: TabId; label: string }) {
   return (
     <button
       onClick={() => tab && setActiveTab(tab)}
-      className="flex items-center gap-2 text-[11px] text-primary/70 bg-primary/5 rounded-lg px-3 py-2 border border-primary/15 hover:bg-primary/10 transition-colors cursor-pointer"
+      className="flex cursor-pointer items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-[11px] text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <ArrowRight className="w-3 h-3" />
       <span>Go to {label}</span>
@@ -112,6 +113,7 @@ function TabSwitchButton({ tab, label }: { tab?: TabId; label: string }) {
 
 export function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === "user";
+  const showTrace = process.env.NEXT_PUBLIC_SHOW_AI_TRACE === "true";
 
   // Extract trace data from data parts
   const tracePart = !isUser
@@ -143,8 +145,8 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       className={`flex gap-2 items-start ${isUser ? "flex-row-reverse" : ""}`}
     >
       <div
-        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-          isUser ? "bg-primary/20" : "bg-muted"
+        className={`mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border ${
+          isUser ? "border-primary/30 bg-primary/15" : "border-border bg-card"
         }`}
       >
         {isUser ? (
@@ -155,7 +157,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       </div>
 
       <div
-        className={`max-w-[85%] space-y-2 ${
+        className={`max-w-[88%] space-y-2 sm:max-w-[78%] ${
           isUser ? "items-end" : "items-start"
         }`}
       >
@@ -167,7 +169,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                 key={i}
                 className={`text-sm leading-relaxed whitespace-pre-wrap ${
                   isUser
-                    ? "bg-primary/20 text-foreground px-3 py-2 rounded-2xl rounded-tr-md"
+                    ? "rounded-2xl rounded-tr-md border border-primary/20 bg-primary/10 px-3 py-2 text-foreground"
                     : "text-foreground/90"
                 }`}
               >
@@ -187,7 +189,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           return null;
         })}
 
-        {traceData && (
+        {showTrace && traceData && (
           <TraceStrip
             data={{
               inputTokens: traceData.inputTokens as number,

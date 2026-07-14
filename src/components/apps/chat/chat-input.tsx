@@ -25,14 +25,15 @@ export function ChatInput({
   isLoading,
 }: ChatInputProps) {
   return (
-    <div className="border-t border-border p-3">
+    <div className="shrink-0 border-t border-border/70 bg-card/30 p-3 sm:px-5 sm:py-4">
       {input === "" && (
-        <div className="flex flex-wrap gap-1.5 mb-2">
+        <div className="mb-2.5 flex flex-nowrap gap-1.5 overflow-x-auto pb-0.5 scrollbar-hide sm:flex-wrap">
           {suggestedPrompts.map((prompt) => (
             <button
               key={prompt}
+              type="button"
               onClick={() => onSubmit(prompt)}
-              className="text-[11px] px-2.5 py-1 rounded-full bg-primary/10 text-primary/80 hover:bg-primary/15 hover:text-primary transition-colors border border-primary/20"
+              className="shrink-0 rounded-full border border-border bg-background/70 px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {prompt}
             </button>
@@ -44,23 +45,25 @@ export function ChatInput({
           e.preventDefault();
           onSubmit(input);
         }}
-        className="flex gap-2"
+        className="gradient-surface flex gap-2 rounded-xl bg-card p-1"
       >
         <Input
+          aria-label="Ask Devion's AI Twin a question"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask me anything..."
           disabled={isLoading}
-          className="flex-1 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground text-sm"
+          className="h-10 flex-1 border-0 bg-transparent px-3 text-sm text-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-0 dark:bg-transparent"
           autoComplete="off"
         />
         <Button
           type="submit"
           size="icon"
+          aria-label="Send message"
           disabled={isLoading || !input.trim()}
-          className="shrink-0 bg-primary/15 hover:bg-primary/25 text-primary"
+          className="size-10 shrink-0 rounded-lg bg-foreground text-background hover:bg-foreground/85"
         >
-          <Send className="w-4 h-4" />
+          <Send className="w-4 h-4" aria-hidden="true" />
         </Button>
       </form>
     </div>

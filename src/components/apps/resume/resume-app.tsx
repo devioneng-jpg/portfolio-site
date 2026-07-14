@@ -5,27 +5,26 @@ import { skillCategories } from "@/lib/data/skills";
 import { aboutMe } from "@/lib/data/social-links";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Briefcase, Code, Download } from "lucide-react";
+import { Briefcase, Code } from "lucide-react";
 
 export function ResumeApp() {
   return (
-    <div className="h-full overflow-y-auto p-6 md:p-10 scrollbar-thin">
+    <div
+      id="resume-panel"
+      role="tabpanel"
+      aria-labelledby="resume-tab"
+      className="h-full overflow-y-auto p-6 md:p-10 scrollbar-thin"
+    >
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h2 className="text-xl font-bold text-foreground">{aboutMe.name}</h2>
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              {aboutMe.name}
+            </h2>
             <p className="text-sm text-muted-foreground">{aboutMe.title}</p>
             <p className="text-xs text-muted-foreground/70 mt-1">{aboutMe.location}</p>
           </div>
-          <a
-            href="/resume.pdf"
-            download
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors bg-card px-3 py-1.5 rounded-lg border border-border hover:border-primary/30"
-          >
-            <Download className="w-3 h-3" />
-            PDF
-          </a>
         </div>
 
         <p className="text-sm text-muted-foreground leading-relaxed mb-6">
@@ -42,7 +41,7 @@ export function ResumeApp() {
           </div>
           <div className="space-y-5">
             {experiences.map((exp) => (
-              <div key={exp.id} className="border-l-2 border-primary/20 pl-4">
+              <div key={exp.id} className="border-l border-primary/40 pl-4">
                 <div className="flex items-start justify-between">
                   <div>
                     <h4 className="text-sm font-semibold text-foreground">

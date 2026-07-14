@@ -10,16 +10,16 @@ Guidance for AI coding agents working in this repo. Humans welcome too.
 
 ## What this project is
 
-A personal portfolio for **Devion Tharpe** styled as an OS/desktop with
-tab-based "apps." An AI assistant ("Dev-GPT") answers questions about Devion
+A personal portfolio for **Devion Tharpe** with tab-based experiences. An AI
+assistant ("Devion's AI Twin") answers questions about Devion
 and can render structured results inline or switch tabs.
 
 Apps:
 - **Resume** — formal resume view (`components/apps/resume`)
-- **Projects** — project gallery (`components/apps/projects`)
+- **Projects** — Solutions Engineering case studies (`components/apps/projects`)
 - **Chat** — streaming AI chat with tool calls + LiveKit voice mode
   (`components/apps/chat`)
-- **Contact** — contact form / links (`components/apps/contact`)
+- **Contact** — social, email, and Cal.com links (`components/apps/contact`)
 
 ## Tech stack
 
@@ -32,8 +32,6 @@ Apps:
 - **Voice**: LiveKit (`livekit-client`, `@livekit/components-react`,
   `livekit-server-sdk`)
 - **Validation**: Zod 4
-- **Animation**: Motion (Framer Motion successor)
-- **Windows**: `react-rnd` for draggable/resizable surfaces
 
 ## Project layout
 
@@ -97,9 +95,13 @@ pnpm lint         # eslint
 Required for full functionality:
 
 - `ANTHROPIC_API_KEY` — for `/api/chat`
+- `ANTHROPIC_MODEL` — optional centralized model override
+- `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `RATE_LIMIT_SALT` —
+ durable production rate limiting
+- `APP_URL` — canonical deployment URL and API origin
 - `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `LIVEKIT_URL` — for
   `/api/voice-token` and the voice chat client
-- `NEXT_PUBLIC_LIVEKIT_URL` — public LiveKit URL for the browser client
+- `LIVEKIT_AGENT_NAME` — deployed LiveKit agent to dispatch for voice sessions
 
 Put local values in `.env.local` (gitignored).
 

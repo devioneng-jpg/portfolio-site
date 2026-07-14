@@ -3,44 +3,35 @@ import {
   convertToModelMessages,
   createUIMessageStream,
   createUIMessageStreamResponse,
+  safeValidateUIMessages,
 } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
+import { trace } from "@opentelemetry/api";
 import { allTools } from "@/lib/tools";
 import { z } from "zod";
+import { buildTraceUrl } from "@/lib/langfuse";
+import {
+  checkRateLimit,
+  getClientIdentifier,
+} from "@/lib/rate-limit";
+import type { PortfolioMessage } from "@/lib/chat-types";
 
 export const maxDuration = 30;
 
-// Simple in-memory rate limiter (~30 req/hr per IP)
-export const rateLimit = new Map<string, { count: number; resetAt: number }>();
+export const chatRequestBodySchema = z
+  .object({
+    id: z.string().min(1),
+    messages: z.array(z.unknown()),
+    trigger: z.enum(["submit-message", "regenerate-message"]),
+    messageId: z.string().min(1).optional(),
+  })
+  .strict();
 
-export function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const window = rateLimit.get(ip);
-
-  if (!window || now > window.resetAt) {
-    rateLimit.set(ip, { count: 1, resetAt: now + 3600000 });
-    return true;
-  }
-
-  if (window.count >= 30) {
-    return false;
-  }
-
-  window.count++;
-  return true;
-}
-
-const bodySchema = z.object({
-  messages: z
-    .array(
-      z
-        .object({
-          role: z.enum(["user", "assistant", "system"]),
-        })
-        .passthrough()
-    )
-    .max(50),
-});
+const MODEL_ID =
+  process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514";
+const MAX_REQUEST_BYTES = 100_000;
+const MAX_MESSAGES = 50;
+const MAX_TEXT_CHARACTERS = 30_000;
 
 // Claude Sonnet 4 pricing per 1M tokens
 const INPUT_COST_PER_M = 3.0;
@@ -89,14 +80,15 @@ You have two types of tools:
 - showAbout: Show bio card in chat — use for introduction questions
 
 ### Tab-Switching Tools (navigate to other sections)
-- switchToProjects: Switch to the Projects tab — use for detailed project browsing
-- switchToContact: Switch to the Contact tab — use for contact/connection requests
-- switchToResume: Switch to the Resume tab — use for formal resume requests
+- switchToProjects: Offer a button to the Projects tab — use for detailed case studies, architecture, business value, and production considerations
+- switchToContact: Offer a button to the Contact tab — use for contact/connection requests
+- switchToResume: Offer a button to the Resume tab — use for formal resume requests
+- bookMeeting: Render Devion's Cal.com link with 15- and 30-minute options — use when a visitor wants to schedule a call
 
 ## Decision Logic
 - Quick questions → use inline tools to show data directly in chat
-- "Show me everything" / detailed browsing → switch to the relevant tab
-- You can combine both: show a quick preview inline AND switch to the full tab
+- "Show me everything" / detailed browsing → offer the relevant tab button
+- You can combine a quick inline preview with a button to the full view
 - For "tell me about yourself" → use showAbout
 - For "what can you do" → describe your capabilities and suggest things to ask
 - Always respond with some text context alongside tool calls
@@ -108,50 +100,94 @@ You have two types of tools:
 - Never make up information that isn't in the data
 - Always be helpful and guide the user to explore the portfolio
 - If asked something you don't know, suggest what you CAN help with
-- Reference switching tabs naturally — "I can take you to the Projects tab", "Let me switch you to Contact", etc.
+- Tab tools render navigation buttons; never claim navigation already happened
 - Protect privacy and minimize sensitive data — do not share personal contact details unless explicitly provided in your context`;
 
 export async function POST(req: Request) {
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown";
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return jsonResponse({ error: "Chat is not configured" }, 503);
+  }
 
-  if (!checkRateLimit(ip)) {
-    return new Response("Rate limit exceeded. Try again later.", {
-      status: 429,
-    });
+  const contentLength = Number(req.headers.get("content-length") ?? 0);
+  if (contentLength > MAX_REQUEST_BYTES) {
+    return jsonResponse({ error: "Request is too large" }, 413);
+  }
+
+  const limit = await checkRateLimit({
+    scope: "chat",
+    identifier: getClientIdentifier(req),
+    limit: 30,
+    windowSeconds: 3600,
+  });
+  if (!limit.configured) {
+    return jsonResponse({ error: "Chat is temporarily unavailable" }, 503);
+  }
+  if (!limit.success) {
+    return jsonResponse(
+      { error: "Rate limit exceeded. Try again later." },
+      429,
+      { "Retry-After": String(limit.retryAfterSeconds) }
+    );
   }
 
   let body: unknown;
   try {
-    body = await req.json();
+    const rawBody = await req.text();
+    if (rawBody.length > MAX_REQUEST_BYTES) {
+      return jsonResponse({ error: "Request is too large" }, 413);
+    }
+    body = JSON.parse(rawBody);
   } catch {
-    return new Response(JSON.stringify({ error: "Invalid JSON" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Invalid JSON" }, 400);
   }
 
-  const parsed = bodySchema.safeParse(body);
+  const parsed = chatRequestBodySchema.safeParse(body);
   if (!parsed.success) {
-    return new Response(JSON.stringify({ error: "Invalid request" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Invalid request" }, 400);
+  }
+
+  const validated = await safeValidateUIMessages<PortfolioMessage>({
+    messages: parsed.data.messages,
+    tools: allTools,
+    dataSchemas: {
+      trace: z.object({
+        inputTokens: z.number(),
+        outputTokens: z.number(),
+        latencyMs: z.number(),
+        cost: z.number(),
+        model: z.string(),
+        traceUrl: z.string().url().optional(),
+      }),
+    },
+  });
+
+  if (!validated.success || validated.data.length > MAX_MESSAGES) {
+    return jsonResponse({ error: "Invalid messages" }, 400);
+  }
+
+  const textCharacters = validated.data.reduce((messageTotal, message) => {
+    return (
+      messageTotal +
+      message.parts.reduce((partTotal, part) => {
+        return part.type === "text" ? partTotal + part.text.length : partTotal;
+      }, 0)
+    );
+  }, 0);
+  if (textCharacters > MAX_TEXT_CHARACTERS) {
+    return jsonResponse({ error: "Conversation is too long" }, 413);
   }
 
   try {
-    const modelMessages = await convertToModelMessages(
-      parsed.data.messages as Parameters<typeof convertToModelMessages>[0]
-    );
+    const modelMessages = await convertToModelMessages(validated.data, {
+      tools: allTools,
+    });
 
     const startTime = Date.now();
 
-    const stream = createUIMessageStream({
+    const stream = createUIMessageStream<PortfolioMessage>({
       execute: ({ writer }) => {
         const result = streamText({
-          model: anthropic("claude-sonnet-4-20250514"),
+          model: anthropic(MODEL_ID),
           system: systemPrompt,
           messages: modelMessages,
           tools: allTools,
@@ -164,30 +200,41 @@ export async function POST(req: Request) {
             const inTok = usage.inputTokens ?? 0;
             const outTok = usage.outputTokens ?? 0;
             const cost = estimateCost(inTok, outTok);
+            const traceId = trace.getActiveSpan()?.spanContext().traceId;
+            const traceUrl = traceId ? buildTraceUrl(traceId) ?? undefined : undefined;
 
             writer.write({
-              type: "data-trace" as never,
+              type: "data-trace",
               data: {
                 inputTokens: inTok,
                 outputTokens: outTok,
                 latencyMs,
                 cost: Math.round(cost * 10000) / 10000,
-                model: response.modelId ?? "claude-sonnet-4-20250514",
+                model: response.modelId ?? MODEL_ID,
+                traceUrl,
               },
-            } as never);
+            });
           },
         });
 
-        writer.merge(result.toUIMessageStream());
+        writer.merge(result.toUIMessageStream<PortfolioMessage>());
       },
     });
 
     return createUIMessageStreamResponse({ stream });
   } catch (error) {
     console.error("[chat] Error:", error);
-    return new Response(JSON.stringify({ error: "Something went wrong" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Something went wrong" }, 500);
   }
+}
+
+function jsonResponse(
+  body: Record<string, string>,
+  status: number,
+  headers?: Record<string, string>
+) {
+  return Response.json(body, {
+    status,
+    headers,
+  });
 }
