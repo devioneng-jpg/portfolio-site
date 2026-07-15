@@ -30,31 +30,38 @@ export function ChatApp() {
       aria-labelledby="chat-tab"
       className="flex h-full min-h-0 flex-col"
     >
-      <div className="flex shrink-0 items-center justify-between border-b border-border/70 bg-card/30 px-3 py-2.5 sm:px-5">
+      <div className="flex min-h-16 shrink-0 items-center justify-between border-b border-border px-4 sm:min-h-20 sm:px-8">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Conversation
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+            01 / Interactive portfolio
           </p>
-          <p className="hidden text-xs text-foreground/80 sm:block">
-            Ask about my work, approach, or experience
+          <p className="hidden text-xs text-muted-foreground sm:block">
+            Explore the work in your preferred format
           </p>
         </div>
         <ChatModeToggle mode={mode} onModeChange={setMode} />
       </div>
 
-      <div className="min-h-0 flex-1" data-testid="chat-mode-content">
+      <div
+        className="min-h-0 min-w-0 flex-1 overflow-hidden"
+        data-testid="chat-mode-content"
+      >
         {mode === "text" ? (
-          <div className="flex h-full min-h-0 flex-col">
-          <MessageList messages={messages} isLoading={isLoading} error={error} />
-          <ChatInput
-            input={input}
-            setInput={setInput}
-            onSubmit={handleSubmit}
-            isLoading={isLoading}
-          />
+          <div className="flex h-full min-h-0 min-w-0 flex-col">
+            <MessageList
+              messages={messages}
+              isLoading={isLoading}
+              error={error}
+            />
+            <ChatInput
+              input={input}
+              setInput={setInput}
+              onSubmit={handleSubmit}
+              isLoading={isLoading}
+            />
           </div>
         ) : (
-          <div className="h-full min-h-0">
+          <div className="h-full min-h-0 min-w-0">
             <VoiceChat />
           </div>
         )}

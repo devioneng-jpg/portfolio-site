@@ -11,15 +11,15 @@ interface ProjectCardsInlineProps {
 export function ProjectCardsInline({ projects }: ProjectCardsInlineProps) {
   return (
     <div
-      className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin"
+      className="flex max-w-full gap-2 overflow-x-auto pb-2 scrollbar-thin"
       aria-label="Project previews"
     >
       {projects.map((project) => (
         <div
           key={project.id}
-          className="min-w-[230px] max-w-[260px] bg-card rounded-lg p-3 border border-border shrink-0"
+          className="w-60 shrink-0 border border-border bg-card p-4"
         >
-          <h4 className="text-xs font-semibold text-foreground/90 mb-1">
+          <h4 className="mb-1 text-sm font-bold tracking-tight text-foreground">
             {project.title}
           </h4>
           <p className="text-[10px] text-muted-foreground mb-2 line-clamp-3">
@@ -30,22 +30,22 @@ export function ProjectCardsInline({ projects }: ProjectCardsInlineProps) {
               <Badge
                 key={t}
                 variant="secondary"
-                className="text-[9px] px-1.5 py-0 bg-primary/10 text-primary/60 border-0"
+                className="rounded-none border border-border bg-transparent px-1.5 py-0 text-[9px] uppercase tracking-wide text-muted-foreground"
               >
                 {t}
               </Badge>
             ))}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             {project.github && (
               <a
                 href={project.github}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`View ${project.title} source code`}
-                className="text-muted-foreground hover:text-primary transition-colors"
+                className="inline-flex size-8 items-center justify-center border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <Code className="w-3 h-3" />
+                <Code className="size-3.5" aria-hidden="true" />
               </a>
             )}
             {project.live && (
@@ -54,9 +54,9 @@ export function ProjectCardsInline({ projects }: ProjectCardsInlineProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`Open ${project.title} live demo`}
-                className="text-muted-foreground hover:text-primary transition-colors"
+                className="inline-flex size-8 items-center justify-center border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <ExternalLink className="w-3 h-3" />
+                <ExternalLink className="size-3.5" aria-hidden="true" />
               </a>
             )}
           </div>

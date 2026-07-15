@@ -1,10 +1,10 @@
-# Devion's AI Twin — Devion Tharpe's Portfolio
+# Devion's AI Twin | Devion Tharpe's Portfolio
 
 A personal portfolio for **Devion Tharpe** (Senior Solutions Engineer, Twilio)
 with tab-based experiences. The centerpiece is **Devion's AI Twin**,
 an AI assistant that knows Devion's background and can answer questions,
 render structured results inline, or offer navigation to detailed case studies,
-resume, and contact views — including a LiveKit-powered voice mode.
+resume, and contact views, including a LiveKit-powered voice mode.
 
 ## Apps
 
@@ -25,7 +25,7 @@ resume, and contact views — including a LiveKit-powered voice mode.
   Anthropic Claude; tool calls drive inline UI and tab switching
 - **Voice**: LiveKit (`livekit-client`, `@livekit/components-react`,
   `livekit-server-sdk`)
-- **Observability**: Langfuse via OpenTelemetry (`@langfuse/otel`) — traces
+- **Observability**: Langfuse via OpenTelemetry (`@langfuse/otel`) :  traces
   every LLM call with token usage & latency
 - **Validation**: Zod 4
 
@@ -57,7 +57,7 @@ RATE_LIMIT_SALT=...
 # Public deployment URL
 APP_URL=https://your-domain.example
 
-# Optional — Langfuse tracing (works without, just no observability)
+# Optional :  Langfuse tracing (works without, just no observability)
 LANGFUSE_SECRET_KEY=sk-lf-...
 LANGFUSE_PUBLIC_KEY=pk-lf-...
 LANGFUSE_BASEURL=https://cloud.langfuse.com
@@ -91,13 +91,13 @@ pnpm test:e2e     # Playwright desktop + mobile smoke tests
 Tests use [Vitest](https://vitest.dev/) and live alongside source code in
 `__tests__/` directories:
 
-- `src/lib/__tests__/tools.test.ts` — tool execute functions (projects,
+- `src/lib/__tests__/tools.test.ts` :  tool execute functions (projects,
   skills, experience, about, bookMeeting, tab-switch)
-- `src/app/api/chat/__tests__/route.test.ts` — rate limiter logic and cost
+- `src/app/api/chat/__tests__/route.test.ts` :  rate limiter logic and cost
   estimation plus chat request validation
-- `src/app/api/voice-token/__tests__/route.test.ts` — voice configuration,
+- `src/app/api/voice-token/__tests__/route.test.ts` :  voice configuration,
   short-lived room issuance, and abuse limits
-- `tests/e2e/portfolio.spec.ts` — desktop/mobile navigation and keyboard smoke
+- `tests/e2e/portfolio.spec.ts` :  desktop/mobile navigation and keyboard smoke
   coverage
 
 Run `pnpm test` for unit/integration coverage. Install Chromium once with
@@ -136,10 +136,10 @@ Path alias: `@/*` → `src/*`.
 
 Portfolio content lives in `src/lib/data/`:
 
-- `projects.ts` — project gallery entries
-- `experience.ts` — work history / timeline
-- `skills.ts` — tech stack
-- `social-links.ts` — contact + social URLs
+- `projects.ts` :  project gallery entries
+- `experience.ts` :  work history / timeline
+- `skills.ts` :  tech stack
+- `social-links.ts` :  contact + social URLs
 
 Edit there, not inline in components.
 
@@ -162,6 +162,6 @@ Designed to deploy cleanly to Vercel. Set the environment variables above inthe 
 
 ## License
 
-Personal portfolio — no license granted for reuse of the content
+Personal portfolio :  no license granted for reuse of the content
 (copy, bio, project descriptions, branding). The scaffolding code is fine
 to learn from.

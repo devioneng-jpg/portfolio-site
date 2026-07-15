@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const alt =
-  "Devion Tharpe — Senior Solutions Engineer and AI builder";
+  "Devion Tharpe | Senior Solutions Engineer and AI builder";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -9,58 +9,62 @@ export default function OpenGraphImage() {
   return new ImageResponse(
     <div
       style={{
-        alignItems: "center",
-        background: "#eef0f3",
-        color: "#171717",
+        background: "#1a1916",
+        color: "#f4efdf",
         display: "flex",
+        fontFamily: "Arial, Helvetica, sans-serif",
         height: "100%",
-        justifyContent: "center",
-        padding: "72px",
+        padding: "64px",
         width: "100%",
       }}
     >
       <div
         style={{
-          border: "2px solid #c9ced6",
-          borderRadius: "28px",
+          border: "1px solid #4a463d",
           display: "flex",
           flexDirection: "column",
-          gap: "24px",
-          maxWidth: "1020px",
-          padding: "64px",
+          height: "100%",
+          justifyContent: "space-between",
+          padding: "52px",
           width: "100%",
         }}
       >
         <div
           style={{
-            color: "#1f638f",
+            color: "#e2ad45",
             display: "flex",
             fontSize: "24px",
-            letterSpacing: "0.12em",
+            fontWeight: 700,
+            letterSpacing: "0.16em",
             textTransform: "uppercase",
           }}
         >
-          Solutions engineering in practice
+          DEVION THARPE / SOLUTIONS ENGINEERING
         </div>
         <div
           style={{
             display: "flex",
-            fontSize: "68px",
+            flexDirection: "column",
+            fontSize: "86px",
             fontWeight: 700,
-            lineHeight: 1.08,
+            letterSpacing: "-0.055em",
+            lineHeight: 0.9,
           }}
         >
-          Devion Tharpe
+          <div style={{ display: "flex" }}>Customer problems.</div>
+          <div style={{ display: "flex" }}>Production paths.</div>
         </div>
         <div
           style={{
-            color: "#555b63",
+            borderTop: "1px solid #4a463d",
+            color: "#aaa394",
             display: "flex",
-            fontSize: "30px",
+            fontSize: "24px",
             lineHeight: 1.35,
+            paddingTop: "24px",
           }}
         >
-          Senior Solutions Engineer building production-minded AI experiences.
+          Senior Solutions Engineer building credible AI systems.
         </div>
       </div>
     </div>,

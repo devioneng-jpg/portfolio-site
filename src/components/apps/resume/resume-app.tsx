@@ -13,21 +13,26 @@ export function ResumeApp() {
       id="resume-panel"
       role="tabpanel"
       aria-labelledby="resume-tab"
-      className="h-full overflow-y-auto p-6 md:p-10 scrollbar-thin"
+      className="h-full overflow-y-auto p-5 scrollbar-thin sm:p-8 md:p-12"
     >
-      <div className="max-w-2xl mx-auto">
+      <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <div className="flex items-start justify-between mb-4">
+        <div className="mb-10 grid gap-8 border-b border-border pb-10 md:grid-cols-[1fr_20rem] md:items-end">
           <div>
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">
-              {aboutMe.name}
-            </h2>
-            <p className="text-sm text-muted-foreground">{aboutMe.title}</p>
-            <p className="text-xs text-muted-foreground/70 mt-1">{aboutMe.location}</p>
+            <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              03 / Experience & capability
+            </p>
+            <h1 className="text-[clamp(3rem,8vw,7rem)] font-bold leading-[0.82] tracking-[-0.07em] text-foreground">
+              {aboutMe.name}<span className="text-primary">.</span>
+            </h1>
+          </div>
+          <div className="border-t border-border pt-4">
+            <p className="text-lg font-semibold text-foreground">{aboutMe.title}</p>
+            <p className="mt-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">{aboutMe.location}</p>
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+        <p className="mb-10 max-w-3xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
           {aboutMe.bio}
         </p>
 
@@ -36,34 +41,40 @@ export function ResumeApp() {
         {/* Experience */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-4">
-            <Briefcase className="w-4 h-4 text-primary/60" />
-            <h3 className="text-sm font-semibold text-foreground">Experience</h3>
+            <Briefcase className="size-4 text-primary" aria-hidden="true" />
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
+              Experience
+            </h2>
           </div>
           <div className="space-y-5">
             {experiences.map((exp) => (
-              <div key={exp.id} className="border-l border-primary/40 pl-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="text-sm font-semibold text-foreground">
-                      {exp.role}
-                    </h4>
-                    <p className="text-xs text-muted-foreground">{exp.company}</p>
+              <div key={exp.id} className="grid gap-3 border-t border-border pt-5 md:grid-cols-[10rem_1fr]">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
+                  {exp.period}
+                </span>
+                <div>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold tracking-tight text-foreground">
+                        {exp.role}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {exp.company}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-[11px] text-muted-foreground/70 shrink-0">
-                    {exp.period}
-                  </span>
+                  <ul className="mt-2 space-y-1">
+                    {exp.highlights.map((h, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-1.5 text-xs text-muted-foreground"
+                      >
+                        <span className="mt-0.5 text-primary/60">•</span>
+                        {h}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="mt-2 space-y-1">
-                  {exp.highlights.map((h, i) => (
-                    <li
-                      key={i}
-                      className="text-xs text-muted-foreground flex items-start gap-1.5"
-                    >
-                      <span className="text-primary/40 mt-0.5">•</span>
-                      {h}
-                    </li>
-                  ))}
-                </ul>
               </div>
             ))}
           </div>
@@ -74,8 +85,10 @@ export function ResumeApp() {
         {/* Skills */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <Code className="w-4 h-4 text-primary/60" />
-            <h3 className="text-sm font-semibold text-foreground">Skills</h3>
+            <Code className="size-4 text-primary" aria-hidden="true" />
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
+              Capabilities
+            </h2>
           </div>
           <div className="space-y-3">
             {skillCategories.map((cat) => (
@@ -88,7 +101,7 @@ export function ResumeApp() {
                     <Badge
                       key={skill}
                       variant="secondary"
-                      className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary/70 border-0"
+                      className="rounded-none border border-border bg-transparent px-2.5 py-1 text-[9px] uppercase tracking-wider text-muted-foreground"
                     >
                       {skill}
                     </Badge>

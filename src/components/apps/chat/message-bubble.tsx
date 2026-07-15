@@ -52,10 +52,10 @@ function renderToolPart(part: PortfolioMessage["parts"][number], index: number) 
       return (
         <div
           key={index}
-          className="rounded-xl border border-border bg-card p-3 text-sm text-foreground/80"
+          className="border border-border bg-card p-4 text-sm text-foreground/80"
         >
-          <p className="font-medium text-foreground/90 mb-1">{about.name}</p>
-          <p className="text-xs text-muted-foreground mb-2">
+          <p className="mb-1 text-sm font-bold text-foreground">{about.name}</p>
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-primary">
             {about.title} &middot; {about.location}
           </p>
           <p className="text-xs leading-relaxed">{about.bio}</p>
@@ -67,15 +67,15 @@ function renderToolPart(part: PortfolioMessage["parts"][number], index: number) 
       return (
         <div
           key={index}
-          className="rounded-xl border border-primary/20 bg-primary/5 p-3"
+          className="border border-primary/40 bg-primary/5 p-4"
         >
           <a
             href={meeting.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-primary transition-colors hover:text-primary/80"
           >
-            <Calendar className="w-4 h-4" />
+            <Calendar className="size-4" aria-hidden="true" />
             {meeting.label}
           </a>
         </div>
@@ -103,9 +103,10 @@ function TabSwitchButton({ tab, label }: { tab?: TabId; label: string }) {
   return (
     <button
       onClick={() => tab && setActiveTab(tab)}
-      className="flex cursor-pointer items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-[11px] text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      type="button"
+      className="flex cursor-pointer items-center gap-2 border border-primary/40 bg-primary/5 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em] text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <ArrowRight className="w-3 h-3" />
+      <ArrowRight className="size-3" aria-hidden="true" />
       <span>Go to {label}</span>
     </button>
   );
@@ -145,14 +146,14 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       className={`flex gap-2 items-start ${isUser ? "flex-row-reverse" : ""}`}
     >
       <div
-        className={`mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border ${
+        className={`mt-0.5 flex size-7 shrink-0 items-center justify-center border ${
           isUser ? "border-primary/30 bg-primary/15" : "border-border bg-card"
         }`}
       >
         {isUser ? (
-          <User className="w-3.5 h-3.5 text-primary" />
+          <User className="size-3.5 text-primary" aria-hidden="true" />
         ) : (
-          <Bot className="w-3.5 h-3.5 text-foreground/70" />
+          <Bot className="size-3.5 text-foreground/70" aria-hidden="true" />
         )}
       </div>
 
@@ -169,7 +170,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                 key={i}
                 className={`text-sm leading-relaxed whitespace-pre-wrap ${
                   isUser
-                    ? "rounded-2xl rounded-tr-md border border-primary/20 bg-primary/10 px-3 py-2 text-foreground"
+                    ? "border border-primary/40 bg-primary/10 px-4 py-3 text-foreground"
                     : "text-foreground/90"
                 }`}
               >

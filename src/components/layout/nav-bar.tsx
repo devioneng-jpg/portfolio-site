@@ -21,15 +21,20 @@ export function NavBar() {
   const setActiveTab = useTabStore((s) => s.setActiveTab);
 
   return (
-    <nav className="sticky top-0 z-50 flex min-h-16 items-center justify-between gap-3 border-b border-border/60 bg-background/80 px-3 backdrop-blur-xl sm:px-5">
-      <span className="min-w-0 truncate text-sm font-semibold tracking-tight text-foreground sm:text-base">
-        Devion&apos;s <span className="gradient-text">AI Twin</span>
-      </span>
+    <nav className="sticky top-0 z-50 flex min-h-20 min-w-0 items-center justify-between gap-3 border-b border-border bg-background/95 px-1 sm:min-h-24 sm:gap-4">
+      <div className="min-w-0">
+        <span className="block truncate text-base font-bold uppercase tracking-[-0.04em] text-foreground sm:text-xl">
+          Devion Tharpe<span className="text-primary">.</span>
+        </span>
+        <span className="hidden text-[9px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:block">
+          Solutions engineer / AI systems
+        </span>
+      </div>
 
       <div
         role="tablist"
         aria-label="Portfolio sections"
-        className="flex items-center gap-0.5 rounded-xl border border-border/70 bg-card/80 p-1"
+        className="flex shrink-0 items-center border border-border bg-card"
       >
         {tabs.map(({ id, label, icon: Icon }, index) => (
           <button
@@ -58,13 +63,13 @@ export function NavBar() {
               document.getElementById(`${nextTab.id}-tab`)?.focus();
             }}
             aria-label={label}
-            className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3 ${
+            className={`flex h-9 items-center gap-1.5 border-r border-border px-2 text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors last:border-r-0 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-10 sm:px-4 ${
               activeTab === id
-                ? "bg-foreground text-background shadow-sm"
-                : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
             }`}
           >
-            <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+            <Icon className="size-3.5" aria-hidden="true" />
             <span className="hidden sm:inline">{label}</span>
           </button>
         ))}

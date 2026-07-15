@@ -12,16 +12,20 @@ export function ExperienceInline({ experiences }: ExperienceInlineProps) {
       {experiences.map((exp) => (
         <div
           key={exp.id}
-          className="bg-card rounded-lg p-3 border border-border"
+          className="border border-border bg-card p-4"
         >
-          <div className="flex items-start justify-between mb-1">
+          <div className="mb-2 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h4 className="text-xs font-semibold text-foreground/90">
+              <h4 className="text-sm font-bold tracking-tight text-foreground">
                 {exp.role}
               </h4>
-              <p className="text-[10px] text-muted-foreground">{exp.company}</p>
+              <p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                {exp.company}
+              </p>
             </div>
-            <span className="text-[10px] text-muted-foreground/70">{exp.period}</span>
+            <span className="shrink-0 text-[9px] font-bold uppercase tracking-[0.1em] text-primary">
+              {exp.period}
+            </span>
           </div>
           <p className="text-[10px] text-muted-foreground mb-1.5">
             {exp.description}

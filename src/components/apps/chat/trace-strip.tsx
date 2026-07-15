@@ -21,30 +21,30 @@ export function TraceStrip({ data }: { data: TraceData }) {
     .replace("-20250514", "");
 
   return (
-    <div className="mt-1.5">
+    <div className="mt-2">
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
         aria-expanded={expanded}
         aria-label={expanded ? "Hide AI response trace" : "Show AI response trace"}
-        className="flex items-center gap-1 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+        className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {expanded ? (
-          <ChevronDown className="w-3 h-3" />
+          <ChevronDown className="size-3" aria-hidden="true" />
         ) : (
-          <ChevronRight className="w-3 h-3" />
+          <ChevronRight className="size-3" aria-hidden="true" />
         )}
-        <span>trace</span>
+        <span>Response trace</span>
       </button>
 
       {expanded && (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground/70 bg-muted/30 rounded px-3 py-1.5 mt-0.5">
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 border border-border bg-card px-3 py-2 text-[10px] text-muted-foreground">
           {data.toolCalls && data.toolCalls.length > 0 && (
             <span className="flex items-center gap-1">
               {data.toolCalls.map((tc, i) => (
                 <span
                   key={i}
-                  className="bg-muted rounded px-1.5 py-0.5 text-[10px] font-mono"
+                  className="border border-border bg-background px-1.5 py-0.5 font-mono text-[9px]"
                 >
                   {tc}
                 </span>
@@ -67,10 +67,10 @@ export function TraceStrip({ data }: { data: TraceData }) {
               href={data.traceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-0.5 text-primary/60 hover:text-primary transition-colors"
+              className="inline-flex items-center gap-1 font-semibold uppercase tracking-wide text-primary transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               View trace
-              <ExternalLink className="w-2.5 h-2.5" />
+              <ExternalLink className="size-2.5" aria-hidden="true" />
             </a>
           )}
         </div>

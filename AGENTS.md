@@ -1,7 +1,7 @@
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+This version has breaking changes :  APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
 # AGENTS.md
@@ -15,11 +15,11 @@ assistant ("Devion's AI Twin") answers questions about Devion
 and can render structured results inline or switch tabs.
 
 Apps:
-- **Resume** — formal resume view (`components/apps/resume`)
-- **Projects** — Solutions Engineering case studies (`components/apps/projects`)
-- **Chat** — streaming AI chat with tool calls + LiveKit voice mode
+- **Resume** :  formal resume view (`components/apps/resume`)
+- **Projects** :  Solutions Engineering case studies (`components/apps/projects`)
+- **Chat** :  streaming AI chat with tool calls + LiveKit voice mode
   (`components/apps/chat`)
-- **Contact** — social, email, and Cal.com links (`components/apps/contact`)
+- **Contact** :  social, email, and Cal.com links (`components/apps/contact`)
 
 ## Tech stack
 
@@ -67,7 +67,7 @@ Path alias: `@/*` → `src/*` (see `tsconfig.json`).
   component exports.
 - **Components**: prefer Server Components; mark client components with
   `"use client"` at the top. Keep client boundaries small.
-- **Data**: static portfolio content lives in `src/lib/data/*` — edit there,
+- **Data**: static portfolio content lives in `src/lib/data/*` :  edit there,
   not inline in components.
 - **UI primitives**: extend `components/ui/*` rather than re-implementing
   buttons, cards, etc. Use `cn()` from `lib/utils.ts` to merge classes.
@@ -75,7 +75,7 @@ Path alias: `@/*` → `src/*` (see `tsconfig.json`).
   via `components/apps/chat/tool-renderers/*`; tab-switching tools call into
   the Zustand tab store.
 - **Validation**: validate request bodies and tool inputs with Zod.
-- **No secrets in code** — read from `process.env` only, in route handlers or
+- **No secrets in code** :  read from `process.env` only, in route handlers or
   server components.
 
 ## Commands
@@ -94,14 +94,14 @@ pnpm lint         # eslint
 
 Required for full functionality:
 
-- `ANTHROPIC_API_KEY` — for `/api/chat`
-- `ANTHROPIC_MODEL` — optional centralized model override
-- `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `RATE_LIMIT_SALT` —
+- `ANTHROPIC_API_KEY` :  for `/api/chat`
+- `ANTHROPIC_MODEL` :  optional centralized model override
+- `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `RATE_LIMIT_SALT` : 
  durable production rate limiting
-- `APP_URL` — canonical deployment URL and API origin
-- `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `LIVEKIT_URL` — for
+- `APP_URL` :  canonical deployment URL and API origin
+- `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `LIVEKIT_URL` :  for
   `/api/voice-token` and the voice chat client
-- `LIVEKIT_AGENT_NAME` — deployed LiveKit agent to dispatch for voice sessions
+- `LIVEKIT_AGENT_NAME` :  deployed LiveKit agent to dispatch for voice sessions
 
 Put local values in `.env.local` (gitignored).
 
@@ -127,9 +127,9 @@ Put local values in `.env.local` (gitignored).
 
 - Don't re-introduce the create-next-app boilerplate README.
 - Don't add a second package manager lockfile.
-- Don't put portfolio content (projects, jobs, skills) in components — it
+- Don't put portfolio content (projects, jobs, skills) in components :  it
   belongs in `src/lib/data/`.
 - Don't bypass the rate limiter in `api/chat/route.ts` without replacing it
-  with something better (e.g. Upstash) — it's there for a reason.
+  with something better (e.g. Upstash) :  it's there for a reason.
 - Don't hardcode the Claude model string in multiple places; keep it
   centralized in the chat route.

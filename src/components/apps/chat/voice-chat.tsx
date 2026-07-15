@@ -58,13 +58,13 @@ function VoiceAssistantUI() {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="relative flex size-40 items-center justify-center sm:size-48">
+      <div className="relative flex size-40 items-center justify-center border border-border sm:size-48">
         <div
-          className={`absolute inset-0 rounded-full transition-all duration-500 ${
+          className={`absolute inset-0 transition-colors duration-500 ${
             state === "speaking"
-              ? "bg-primary/20 shadow-[0_0_70px_-15px_var(--color-primary)] animate-pulse"
+              ? "bg-primary/20"
               : state === "listening"
-                ? "bg-primary/10 shadow-[0_0_55px_-20px_var(--color-primary)]"
+                ? "bg-primary/10"
                 : "border border-border bg-card"
           }`}
         />
@@ -78,14 +78,17 @@ function VoiceAssistantUI() {
         )}
         {!audioTrack && (
           <div
-            className={`w-16 h-16 rounded-full flex items-center justify-center ${
+            className={`flex size-16 items-center justify-center ${
               isActive ? "bg-primary/20" : "bg-muted"
             }`}
           >
             {isActive ? (
-              <Mic className="w-8 h-8 text-primary" />
+              <Mic className="size-8 text-primary" aria-hidden="true" />
             ) : (
-              <MicOff className="w-8 h-8 text-muted-foreground" />
+              <MicOff
+                className="size-8 text-muted-foreground"
+                aria-hidden="true"
+              />
             )}
           </div>
         )}
@@ -105,14 +108,14 @@ function VoiceAssistantUI() {
       {microphoneError && (
         <p
           role="alert"
-          className="max-w-sm rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-center text-xs text-destructive"
+          className="max-w-sm border border-destructive/20 bg-destructive/10 p-3 text-center text-xs text-destructive"
         >
           {microphoneError}
         </p>
       )}
 
-      <DisconnectButton className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-        <PhoneOff className="w-4 h-4" />
+      <DisconnectButton className="inline-flex cursor-pointer items-center justify-center gap-2 border border-destructive/40 bg-destructive/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-destructive transition-colors hover:bg-destructive/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <PhoneOff className="size-4" aria-hidden="true" />
         End Call
       </DisconnectButton>
     </div>
@@ -152,7 +155,7 @@ export function VoiceChat() {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 overflow-y-auto p-6">
         <div className="text-center">
-          <p className="text-sm text-destructive font-medium">
+          <p className="text-sm font-bold text-destructive" role="alert">
             Connection Error
           </p>
           <p className="text-xs text-muted-foreground mt-1">{error}</p>
@@ -164,9 +167,9 @@ export function VoiceChat() {
             setError(null);
             connect();
           }}
-          className="gap-2"
+          className="gap-2 rounded-none border-border text-[10px] font-bold uppercase tracking-[0.12em]"
         >
-          <Phone className="w-4 h-4" />
+          <Phone className="size-4" aria-hidden="true" />
           Try Again
         </Button>
       </div>
@@ -175,32 +178,42 @@ export function VoiceChat() {
 
   if (!connectionDetails) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-6 overflow-y-auto p-6">
-        <div className="gradient-surface flex size-24 items-center justify-center rounded-full bg-card shadow-2xl shadow-primary/10">
-          <Mic className="size-10 text-primary" />
+      <div className="mx-auto flex h-full w-full max-w-5xl flex-col justify-center overflow-y-auto p-5 sm:p-8">
+        <div className="grid gap-8 md:grid-cols-[1fr_18rem] md:items-end">
+          <div>
+            <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              Live conversation / Browser audio
+            </p>
+            <h1 className="text-[clamp(2.5rem,7vw,6.5rem)] font-bold leading-[0.86] tracking-[-0.065em] text-foreground">
+              Voice Chat with Devion&apos;s AI Twin<span className="text-primary">.</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Have a natural conversation about Devion&apos;s experience,
+              architecture decisions, and approach to customer problems.
+            </p>
+          </div>
+          <div className="border-t border-border pt-5">
+            <div className="mb-8 flex size-12 items-center justify-center border border-primary bg-primary text-primary-foreground">
+              <Mic className="size-5" aria-hidden="true" />
+            </div>
+            <Button
+              onClick={connect}
+              disabled={isConnecting}
+              aria-busy={isConnecting}
+              className="h-11 w-full justify-between rounded-none bg-foreground px-4 text-[10px] font-bold uppercase tracking-[0.12em] text-background hover:bg-primary hover:text-primary-foreground"
+            >
+              {isConnecting ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Phone className="size-4" aria-hidden="true" />
+              )}
+              {isConnecting ? "Connecting..." : "Start Voice Chat"}
+            </Button>
+            <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">
+              Microphone permission is requested only when you connect.
+            </p>
+          </div>
         </div>
-        <div className="text-center">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">
-            Voice Chat with Devion&apos;s <span className="gradient-text">AI Twin</span>
-          </h2>
-          <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
-            Talk to Devion&apos;s AI Twin using your microphone. Voice sessions
-            are securely connected through LiveKit.
-          </p>
-        </div>
-        <Button
-          onClick={connect}
-          disabled={isConnecting}
-          aria-busy={isConnecting}
-          className="h-10 gap-2 bg-foreground px-4 text-background hover:bg-foreground/85"
-        >
-          {isConnecting ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Phone className="w-4 h-4" />
-          )}
-          {isConnecting ? "Connecting..." : "Start Voice Chat"}
-        </Button>
       </div>
     );
   }
@@ -220,7 +233,7 @@ export function VoiceChat() {
           href={connectionDetails.bookingUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex items-center gap-2 border border-border bg-card px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em] text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Calendar className="size-4" aria-hidden="true" />
           Book time with Devion

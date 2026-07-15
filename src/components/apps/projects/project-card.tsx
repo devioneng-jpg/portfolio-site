@@ -14,30 +14,31 @@ import {
 
 interface ProjectCardProps {
   project: Project;
+  index: number;
 }
 
-export function ProjectCard({ project }: ProjectCardProps) {
+export function ProjectCard({ project, index }: ProjectCardProps) {
   return (
-    <article className="group rounded-2xl border border-border/80 bg-card/80 p-5 shadow-lg shadow-black/10 transition-[border-color,transform,box-shadow] hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-xl hover:shadow-primary/5 md:p-7">
-      <div className="flex flex-col gap-6">
+    <article className="group bg-background p-5 transition-colors hover:bg-card md:p-8">
+      <div className="flex flex-col gap-8">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <h3 className="text-lg font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary">
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+              {(index + 1).toString().padStart(2, "0")} / {project.status}
+            </p>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <h2 className="text-2xl font-bold leading-none tracking-[-0.04em] text-foreground transition-colors group-hover:text-primary sm:text-4xl">
                 {project.title}
-              </h3>
+              </h2>
               {project.featured && (
                 <Badge
                   variant="secondary"
-                  className="gap-1 border-0 bg-primary/10 text-[10px] text-primary"
+                  className="gap-1 rounded-none border border-primary bg-transparent text-[9px] uppercase tracking-wider text-primary"
                 >
                   <Sparkles className="size-3" aria-hidden="true" />
                   Featured
                 </Badge>
               )}
-              <Badge variant="outline" className="text-[10px] text-muted-foreground">
-                {project.status}
-              </Badge>
             </div>
             <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
               {project.description}
@@ -49,7 +50,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               href={project.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors hover:border-primary/30 hover:text-primary"
+              className="inline-flex shrink-0 items-center gap-1.5 border border-border px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em] text-foreground transition-colors hover:border-primary hover:text-primary"
             >
               <Code className="size-4" aria-hidden="true" />
               View source
@@ -58,7 +59,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           )}
         </header>
 
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid border border-border md:grid-cols-3">
           <CaseStudySection
             icon={BriefcaseBusiness}
             title="Customer problem"
@@ -76,7 +77,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           />
         </div>
 
-        <div className="grid gap-5 border-t border-border pt-5 lg:grid-cols-2">
+        <div className="grid gap-8 border-t border-border pt-6 lg:grid-cols-2">
           <DetailList title="Architecture" items={project.architecture} />
           <DetailList
             title="Production considerations"
@@ -89,7 +90,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             <Badge
               key={technology}
               variant="secondary"
-              className="border-0 bg-primary/10 px-2.5 py-0.5 text-xs text-primary/80"
+              className="rounded-none border border-border bg-transparent px-2.5 py-1 text-[9px] uppercase tracking-wider text-muted-foreground"
             >
               {technology}
             </Badge>
@@ -99,7 +100,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               href={project.live}
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-auto inline-flex items-center gap-1 text-xs text-primary hover:underline"
+              className="ml-auto inline-flex items-center gap-1.5 border border-primary px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Open live demo
               <ArrowUpRight className="size-3.5" aria-hidden="true" />
@@ -121,8 +122,8 @@ function CaseStudySection({
   content: string;
 }) {
   return (
-    <section className="rounded-xl border border-border/60 bg-muted/35 p-4">
-      <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-foreground">
+    <section className="border-b border-border bg-card p-4 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0 md:p-5">
+      <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-foreground">
         <Icon className="size-4 text-primary" aria-hidden={true} />
         {title}
       </div>
@@ -134,7 +135,7 @@ function CaseStudySection({
 function DetailList({ title, items }: { title: string; items: string[] }) {
   return (
     <section>
-      <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground/80">
+      <h4 className="mb-3 text-[10px] font-bold uppercase tracking-[0.14em] text-foreground">
         {title}
       </h4>
       <ul className="space-y-1.5 text-xs leading-relaxed text-muted-foreground">

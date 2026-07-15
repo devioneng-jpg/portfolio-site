@@ -6,7 +6,7 @@ import { experiences } from "./data/experience";
 import { aboutMe } from "./data/social-links";
 import { createBookingUrl } from "./booking";
 
-// Inline tools — render components inside chat
+// Inline tools: render components inside chat
 export const showProjects = tool({
   description:
     "Show a compact horizontal scroll of project cards inline in the chat. Use when user asks about projects, portfolio, or what you've built.",
@@ -51,7 +51,7 @@ export const showAbout = tool({
   },
 });
 
-// Tab-switching tools — navigate to different sections
+// Tab-switching tools: navigate to different sections
 export const switchToContact = tool({
   description:
     "Switch to the Contact tab with social links and email. Use when user asks how to reach you, contact info, or wants to connect.",

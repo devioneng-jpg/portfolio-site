@@ -20,7 +20,7 @@ export function SkillBadgesInline({ categories }: SkillBadgesInlineProps) {
               <Badge
                 key={skill}
                 variant="secondary"
-                className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary/70 border-0 hover:bg-primary/15 transition-colors"
+                className="rounded-none border border-border bg-transparent px-2 py-0.5 text-[9px] uppercase tracking-wide text-muted-foreground transition-colors hover:border-primary hover:text-primary"
               >
                 {skill}
               </Badge>

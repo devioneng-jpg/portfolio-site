@@ -25,15 +25,15 @@ export function ChatInput({
   isLoading,
 }: ChatInputProps) {
   return (
-    <div className="shrink-0 border-t border-border/70 bg-card/30 p-3 sm:px-5 sm:py-4">
+    <div className="min-w-0 shrink-0 border-t border-border bg-card p-3 sm:px-8 sm:py-5">
       {input === "" && (
-        <div className="mb-2.5 flex flex-nowrap gap-1.5 overflow-x-auto pb-0.5 scrollbar-hide sm:flex-wrap">
+        <div className="mb-2.5 grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
           {suggestedPrompts.map((prompt) => (
             <button
               key={prompt}
               type="button"
               onClick={() => onSubmit(prompt)}
-              className="shrink-0 rounded-full border border-border bg-background/70 px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="min-w-0 border border-border bg-background px-2 py-1.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-primary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:shrink-0 sm:px-3 sm:text-[10px]"
             >
               {prompt}
             </button>
@@ -45,13 +45,13 @@ export function ChatInput({
           e.preventDefault();
           onSubmit(input);
         }}
-        className="gradient-surface flex gap-2 rounded-xl bg-card p-1"
+        className="flex gap-2 border border-foreground bg-background p-1"
       >
         <Input
           aria-label="Ask Devion's AI Twin a question"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask me anything..."
+          placeholder="Ask a question about Devion..."
           disabled={isLoading}
           className="h-10 flex-1 border-0 bg-transparent px-3 text-sm text-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-0 dark:bg-transparent"
           autoComplete="off"
@@ -61,9 +61,9 @@ export function ChatInput({
           size="icon"
           aria-label="Send message"
           disabled={isLoading || !input.trim()}
-          className="size-10 shrink-0 rounded-lg bg-foreground text-background hover:bg-foreground/85"
+          className="size-10 shrink-0 rounded-none bg-primary text-primary-foreground hover:bg-primary/85"
         >
-          <Send className="w-4 h-4" aria-hidden="true" />
+          <Send className="size-4" aria-hidden="true" />
         </Button>
       </form>
     </div>
