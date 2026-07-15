@@ -28,7 +28,7 @@ export const chatRequestBodySchema = z
   .strict();
 
 const MODEL_ID =
-  process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514";
+  process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
 const MAX_REQUEST_BYTES = 100_000;
 const MAX_MESSAGES = 50;
 const MAX_TEXT_CHARACTERS = 30_000;

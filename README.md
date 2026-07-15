@@ -47,7 +47,7 @@ Create a `.env.local` in the repo root:
 ```bash
 # Required for /api/chat
 ANTHROPIC_API_KEY=sk-ant-...
-ANTHROPIC_MODEL=claude-sonnet-4-20250514
+ANTHROPIC_MODEL=claude-sonnet-4-6
 
 # Required in production for shared API rate limiting
 UPSTASH_REDIS_REST_URL=...
