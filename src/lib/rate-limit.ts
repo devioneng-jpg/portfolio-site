@@ -84,7 +84,7 @@ export async function checkRateLimit({
 
   const redis = getRedis();
   if (!redis) {
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === "production" && !process.env.RATE_LIMIT_SALT) {
       return { success: false, retryAfterSeconds: 60, configured: false };
     }
     return checkMemoryLimit(
