@@ -1,9 +1,24 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { chatRequestBodySchema, estimateCost, POST } from "../route";
+import { chatRequestBodySchema, estimateCost, POST, resolveModelId } from "../route";
 import {
   checkRateLimit,
   resetMemoryRateLimitsForTests,
 } from "@/lib/rate-limit";
+
+describe("resolveModelId", () => {
+  afterEach(() => {
+    delete process.env.ANTHROPIC_MODEL;
+  });
+
+  it("defaults to claude-sonnet-4-6", () => {
+    expect(resolveModelId()).toBe("claude-sonnet-4-6");
+  });
+
+  it("strips accidental ANTHROPIC_MODEL prefixes", () => {
+    process.env.ANTHROPIC_MODEL = "ANTHROPIC_MODEL claude-sonnet-4-6";
+    expect(resolveModelId()).toBe("claude-sonnet-4-6");
+  });
+});
 
 describe("checkRateLimit", () => {
   beforeEach(() => {

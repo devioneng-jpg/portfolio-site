@@ -27,8 +27,21 @@ export const chatRequestBodySchema = z
   })
   .strict();
 
-const MODEL_ID =
-  process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+const MODEL_ID = resolveModelId();
+
+export function resolveModelId(): string {
+  const fallback = "claude-sonnet-4-6";
+  const raw = process.env.ANTHROPIC_MODEL?.trim();
+  if (!raw) return fallback;
+
+  // Handle common copy/paste mistakes from env dashboards.
+  const cleaned = raw
+    .replace(/^ANTHROPIC_MODEL[=:\s]*/i, "")
+    .replace(/^model[=:\s]*/i, "")
+    .trim();
+
+  return cleaned || fallback;
+}
 const MAX_REQUEST_BYTES = 100_000;
 const MAX_MESSAGES = 50;
 const MAX_TEXT_CHARACTERS = 30_000;
