@@ -84,4 +84,19 @@ describe("POST /api/voice-token", () => {
     }
     expect((await POST(voiceRequest())).status).toBe(429);
   });
+
+  it("allows same-host origins in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("APP_URL", "http://localhost:3000");
+
+    const response = await POST(
+      new Request("https://portfolio-site-tli2.vercel.app/api/voice-token", {
+        method: "POST",
+        headers: { Origin: "https://portfolio-site-tli2.vercel.app" },
+      })
+    );
+
+    expect(response.status).not.toBe(403);
+    vi.unstubAllEnvs();
+  });
 });

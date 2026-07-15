@@ -108,10 +108,39 @@ function isAllowedOrigin(request: Request): boolean {
   if (process.env.NODE_ENV !== "production") return true;
 
   const origin = request.headers.get("origin");
-  const allowedOrigins = [
+  if (!origin) return true;
+
+  try {
+    const originHost = new URL(origin).host;
+    const requestHost = new URL(request.url).host;
+    if (originHost === requestHost) return true;
+  } catch {
+    return false;
+  }
+
+  const allowedHosts = [
     process.env.APP_URL,
     process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-  ].filter((value): value is string => Boolean(value));
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : undefined,
+    process.env.VERCEL_BRANCH_URL
+      ? `https://${process.env.VERCEL_BRANCH_URL}`
+      : undefined,
+  ]
+    .filter((value): value is string => Boolean(value))
+    .map((value) => {
+      try {
+        return new URL(value).host;
+      } catch {
+        return null;
+      }
+    })
+    .filter((value): value is string => Boolean(value));
 
-  return Boolean(origin && allowedOrigins.includes(origin));
+  try {
+    return allowedHosts.includes(new URL(origin).host);
+  } catch {
+    return false;
+  }
 }
