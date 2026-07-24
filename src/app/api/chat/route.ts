@@ -16,7 +16,6 @@ import {
 } from "@/lib/rate-limit";
 import {
   getMissingProductionSecurityConfig,
-  hasValidSecuritySession,
   isAllowedOrigin,
   logRouteError,
 } from "@/lib/request-security";
@@ -138,10 +137,6 @@ export async function POST(req: Request) {
 
   if (getMissingProductionSecurityConfig().length > 0) {
     return jsonResponse({ error: "Chat is temporarily unavailable" }, 503);
-  }
-
-  if (!hasValidSecuritySession(req)) {
-    return jsonResponse({ error: "Verification is required" }, 403);
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {

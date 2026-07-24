@@ -4,15 +4,15 @@ function buildContentSecurityPolicy(nonce: string) {
   const isDevelopment = process.env.NODE_ENV === "development";
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://challenges.cloudflare.com${
+    `script-src 'self' 'nonce-${nonce}'${
       isDevelopment ? " 'unsafe-eval'" : ""
     }`,
     `style-src-elem 'self' 'nonce-${nonce}'`,
     "style-src-attr 'unsafe-inline'",
     "font-src 'self' data:",
     "img-src 'self' data: blob:",
-    "connect-src 'self' https://challenges.cloudflare.com https://*.livekit.cloud wss://*.livekit.cloud",
-    "frame-src https://cal.com https://challenges.cloudflare.com",
+    "connect-src 'self' https://*.livekit.cloud wss://*.livekit.cloud",
+    "frame-src https://cal.com",
     "media-src 'self' blob:",
     "worker-src 'self' blob:",
     "object-src 'none'",

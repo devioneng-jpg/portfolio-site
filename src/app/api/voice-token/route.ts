@@ -6,7 +6,6 @@ import {
 import { BOOKING_URL } from "@/lib/booking";
 import {
   getMissingProductionSecurityConfig,
-  hasValidSecuritySession,
   isAllowedOrigin,
   logRouteError,
 } from "@/lib/request-security";
@@ -20,13 +19,6 @@ export async function POST(req: Request) {
     return Response.json(
       { error: "Voice chat is temporarily unavailable" },
       { status: 503 }
-    );
-  }
-
-  if (!hasValidSecuritySession(req)) {
-    return Response.json(
-      { error: "Verification is required" },
-      { status: 403 }
     );
   }
 

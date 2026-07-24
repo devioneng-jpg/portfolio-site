@@ -15,7 +15,7 @@ const sections = [
   },
   {
     title: "What this site stores",
-    body: "The portfolio does not maintain its own database of chat transcripts. Short-lived security cookies are used to remember bot verification and do not identify you by name.",
+    body: "The portfolio does not maintain its own database of chat transcripts.",
   },
   {
     title: "Anonymous site metrics",
@@ -27,11 +27,11 @@ const sections = [
   },
   {
     title: "Abuse prevention",
-    body: "The site uses Cloudflare Turnstile, hashed network identifiers, and request limits to protect paid AI and voice services. Raw IP addresses are not used as Redis rate-limit keys.",
+    body: "The site uses hashed network identifiers and request limits to protect paid AI and voice services. Raw IP addresses are not used as Redis rate-limit keys.",
   },
   {
     title: "Third-party retention",
-    body: "Anthropic, LiveKit, Cloudflare, and Langfuse process data under their own terms and retention settings. Production tracing should remain disabled unless its retention and redaction controls have been reviewed.",
+    body: "Anthropic, LiveKit, and Langfuse process data under their own terms and retention settings. Production tracing should remain disabled unless its retention and redaction controls have been reviewed.",
   },
 ];
 

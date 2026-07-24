@@ -1,17 +1,5 @@
-import {
-  createHmac,
-  randomUUID,
-  timingSafeEqual,
-} from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { ipAddress } from "@vercel/functions";
-
-const SECURITY_COOKIE_NAME = "__Host-portfolio_verified";
-const SECURITY_SESSION_TTL_SECONDS = 60 * 60;
-
-interface SecuritySessionPayload {
-  id: string;
-  expiresAt: number;
-}
 
 function isProduction() {
   return process.env.NODE_ENV === "production";
@@ -70,106 +58,6 @@ export function getClientIdentifier(request: Request): string {
   return "unknown";
 }
 
-export function isSecuritySessionRequired(): boolean {
-  return (
-    isProduction() ||
-    Boolean(
-      process.env.TURNSTILE_SECRET_KEY ||
-        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
-    )
-  );
-}
-
-function getSessionSecret(): string | null {
-  return process.env.SECURITY_SESSION_SECRET?.trim() || null;
-}
-
-function signPayload(encodedPayload: string, secret: string): string {
-  return createHmac("sha256", secret)
-    .update(encodedPayload)
-    .digest("base64url");
-}
-
-export function createSecuritySession(): string {
-  const secret = getSessionSecret();
-  if (!secret) {
-    throw new Error("Security session signing is not configured");
-  }
-
-  const payload: SecuritySessionPayload = {
-    id: randomUUID(),
-    expiresAt: Math.floor(Date.now() / 1000) + SECURITY_SESSION_TTL_SECONDS,
-  };
-  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString(
-    "base64url"
-  );
-
-  return `${encodedPayload}.${signPayload(encodedPayload, secret)}`;
-}
-
-function getCookie(request: Request, name: string): string | null {
-  const cookieHeader = request.headers.get("cookie");
-  if (!cookieHeader) return null;
-
-  for (const cookie of cookieHeader.split(";")) {
-    const [cookieName, ...valueParts] = cookie.trim().split("=");
-    if (cookieName === name) {
-      return valueParts.join("=") || null;
-    }
-  }
-
-  return null;
-}
-
-export function hasValidSecuritySession(request: Request): boolean {
-  if (!isSecuritySessionRequired()) return true;
-
-  const secret = getSessionSecret();
-  const session = getCookie(request, SECURITY_COOKIE_NAME);
-  if (!secret || !session) return false;
-
-  const [encodedPayload, suppliedSignature, ...extraParts] =
-    session.split(".");
-  if (!encodedPayload || !suppliedSignature || extraParts.length > 0) {
-    return false;
-  }
-
-  const expectedSignature = signPayload(encodedPayload, secret);
-  const expectedBuffer = Buffer.from(expectedSignature);
-  const suppliedBuffer = Buffer.from(suppliedSignature);
-  if (
-    expectedBuffer.length !== suppliedBuffer.length ||
-    !timingSafeEqual(expectedBuffer, suppliedBuffer)
-  ) {
-    return false;
-  }
-
-  try {
-    const payload = JSON.parse(
-      Buffer.from(encodedPayload, "base64url").toString("utf8")
-    ) as Partial<SecuritySessionPayload>;
-
-    return (
-      typeof payload.id === "string" &&
-      typeof payload.expiresAt === "number" &&
-      payload.expiresAt > Math.floor(Date.now() / 1000)
-    );
-  } catch {
-    return false;
-  }
-}
-
-export function createSecuritySessionCookie(session: string): string {
-  return [
-    `${SECURITY_COOKIE_NAME}=${session}`,
-    "Path=/",
-    `Max-Age=${SECURITY_SESSION_TTL_SECONDS}`,
-    "HttpOnly",
-    "Secure",
-    "SameSite=Strict",
-  ].join("; ");
-}
-
 export function getMissingProductionSecurityConfig(): string[] {
   if (!isProduction()) return [];
 
@@ -177,9 +65,6 @@ export function getMissingProductionSecurityConfig(): string[] {
     "UPSTASH_REDIS_REST_URL",
     "UPSTASH_REDIS_REST_TOKEN",
     "RATE_LIMIT_SALT",
-    "TURNSTILE_SECRET_KEY",
-    "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
-    "SECURITY_SESSION_SECRET",
   ].filter((name) => !process.env[name]?.trim());
 }
 
