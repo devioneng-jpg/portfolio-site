@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
+import { sanitizeExternalUrl } from "@/lib/safe-url";
 
 interface TraceData {
   inputTokens: number;
@@ -19,6 +20,9 @@ export function TraceStrip({ data }: { data: TraceData }) {
   const modelShort = data.model
     .replace("claude-", "")
     .replace("-20250514", "");
+  const traceUrl = sanitizeExternalUrl(data.traceUrl, {
+    allowedHosts: ["langfuse.com"],
+  });
 
   return (
     <div className="mt-2">
@@ -62,9 +66,9 @@ export function TraceStrip({ data }: { data: TraceData }) {
 
           <span className="font-mono">{modelShort}</span>
 
-          {data.traceUrl && (
+          {traceUrl && (
             <a
-              href={data.traceUrl}
+              href={traceUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-semibold uppercase tracking-wide text-primary transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

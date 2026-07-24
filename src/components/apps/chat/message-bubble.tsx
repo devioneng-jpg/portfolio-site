@@ -7,6 +7,7 @@ import { ProjectCardsInline } from "./tool-renderers/project-cards-inline";
 import { SkillBadgesInline } from "./tool-renderers/skill-badges-inline";
 import { ExperienceInline } from "./tool-renderers/experience-inline";
 import { TraceStrip } from "./trace-strip";
+import { sanitizeExternalUrl } from "@/lib/safe-url";
 
 interface MessageBubbleProps {
   message: PortfolioMessage;
@@ -64,13 +65,18 @@ function renderToolPart(part: PortfolioMessage["parts"][number], index: number) 
     }
     case "bookMeeting": {
       const meeting = output as { url: string; label: string };
+      const meetingUrl = sanitizeExternalUrl(meeting.url, {
+        allowedHosts: ["cal.com"],
+      });
+      if (!meetingUrl) return null;
+
       return (
         <div
           key={index}
           className="border border-primary/40 bg-primary/5 p-4"
         >
           <a
-            href={meeting.url}
+            href={meetingUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-primary transition-colors hover:text-primary/80"

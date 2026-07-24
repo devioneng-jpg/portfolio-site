@@ -1,12 +1,14 @@
 import { createHash } from "node:crypto";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { getClientIdentifier } from "./request-security";
 
 interface RateLimitOptions {
-  scope: "chat" | "voice";
+  scope: "challenge" | "chat" | "voice";
   identifier: string;
   limit: number;
   windowSeconds: number;
+  globalLimit?: number;
 }
 
 export interface RateLimitResult {
@@ -23,7 +25,7 @@ interface MemoryWindow {
 const memoryWindows = new Map<string, MemoryWindow>();
 const durableLimiters = new Map<string, Ratelimit>();
 
-function getRedis(): Redis | null {
+export function getRedis(): Redis | null {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return null;
@@ -76,6 +78,7 @@ export async function checkRateLimit({
   identifier,
   limit,
   windowSeconds,
+  globalLimit,
 }: RateLimitOptions): Promise<RateLimitResult> {
   const hashedIdentifier = hashIdentifier(identifier);
   if (!hashedIdentifier) {
@@ -84,47 +87,91 @@ export async function checkRateLimit({
 
   const redis = getRedis();
   if (!redis) {
-    if (process.env.NODE_ENV === "production" && !process.env.RATE_LIMIT_SALT) {
+    if (process.env.NODE_ENV === "production") {
       return { success: false, retryAfterSeconds: 60, configured: false };
     }
-    return checkMemoryLimit(
+    const individualResult = checkMemoryLimit(
       `${scope}:${hashedIdentifier}`,
       limit,
       windowSeconds
     );
+    if (!individualResult.success || !globalLimit) return individualResult;
+
+    return checkMemoryLimit(
+      `${scope}:global`,
+      globalLimit,
+      windowSeconds
+    );
   }
 
-  const limiterKey = `${scope}:${limit}:${windowSeconds}`;
-  let limiter = durableLimiters.get(limiterKey);
-  if (!limiter) {
-    limiter = new Ratelimit({
+  try {
+    const individualLimiter = getDurableLimiter({
       redis,
-      limiter: Ratelimit.fixedWindow(limit, `${windowSeconds} s`),
-      prefix: `portfolio:${scope}`,
-      analytics: true,
+      scope,
+      kind: "individual",
+      limit,
+      windowSeconds,
     });
-    durableLimiters.set(limiterKey, limiter);
+    const checks = [individualLimiter.limit(hashedIdentifier)];
+
+    if (globalLimit) {
+      const globalLimiter = getDurableLimiter({
+        redis,
+        scope,
+        kind: "global",
+        limit: globalLimit,
+        windowSeconds,
+      });
+      checks.push(globalLimiter.limit("all-visitors"));
+    }
+
+    const results = await Promise.all(checks);
+    const blockedResult = results.find((result) => !result.success);
+    const resetAt = blockedResult?.reset ?? Math.max(...results.map((r) => r.reset));
+
+    return {
+      success: !blockedResult,
+      retryAfterSeconds: Math.max(
+        1,
+        Math.ceil((resetAt - Date.now()) / 1000)
+      ),
+      configured: true,
+    };
+  } catch {
+    return { success: false, retryAfterSeconds: 60, configured: false };
   }
-
-  const result = await limiter.limit(hashedIdentifier);
-  return {
-    success: result.success,
-    retryAfterSeconds: Math.max(
-      1,
-      Math.ceil((result.reset - Date.now()) / 1000)
-    ),
-    configured: true,
-  };
 }
 
-export function getClientIdentifier(request: Request): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
-  );
+function getDurableLimiter({
+  redis,
+  scope,
+  kind,
+  limit,
+  windowSeconds,
+}: {
+  redis: Redis;
+  scope: RateLimitOptions["scope"];
+  kind: "individual" | "global";
+  limit: number;
+  windowSeconds: number;
+}) {
+  const limiterKey = `${scope}:${kind}:${limit}:${windowSeconds}`;
+  let limiter = durableLimiters.get(limiterKey);
+  if (limiter) return limiter;
+
+  limiter = new Ratelimit({
+    redis,
+    limiter: Ratelimit.fixedWindow(limit, `${windowSeconds} s`),
+    prefix: `portfolio:${scope}:${kind}`,
+    analytics: true,
+  });
+  durableLimiters.set(limiterKey, limiter);
+  return limiter;
 }
+
+export { getClientIdentifier };
 
 export function resetMemoryRateLimitsForTests() {
   memoryWindows.clear();
+  durableLimiters.clear();
 }

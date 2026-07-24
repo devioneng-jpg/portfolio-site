@@ -19,6 +19,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { sanitizeExternalUrl } from "@/lib/safe-url";
+import { PrivacyNotice } from "./privacy-notice";
 
 interface ConnectionDetails {
   token: string;
@@ -150,6 +152,9 @@ export function VoiceChat() {
   const disconnect = useCallback(() => {
     setConnectionDetails(null);
   }, []);
+  const bookingUrl = sanitizeExternalUrl(connectionDetails?.bookingUrl, {
+    allowedHosts: ["cal.com"],
+  });
 
   if (error) {
     return (
@@ -212,6 +217,7 @@ export function VoiceChat() {
             <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">
               Microphone permission is requested only when you connect.
             </p>
+            <PrivacyNotice voice />
           </div>
         </div>
       </div>
@@ -229,15 +235,17 @@ export function VoiceChat() {
         className="flex flex-col items-center gap-4"
       >
         <VoiceAssistantUI />
-        <a
-          href={connectionDetails.bookingUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 border border-border bg-card px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em] text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <Calendar className="size-4" aria-hidden="true" />
-          Book time with Devion
-        </a>
+        {bookingUrl && (
+          <a
+            href={bookingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 border border-border bg-card px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em] text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Calendar className="size-4" aria-hidden="true" />
+            Book time with Devion
+          </a>
+        )}
         <RoomAudioRenderer />
       </LiveKitRoom>
     </div>

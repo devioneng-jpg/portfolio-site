@@ -4,17 +4,38 @@ import {
   getClientIdentifier,
 } from "@/lib/rate-limit";
 import { BOOKING_URL } from "@/lib/booking";
+import {
+  getMissingProductionSecurityConfig,
+  hasValidSecuritySession,
+  isAllowedOrigin,
+  logRouteError,
+} from "@/lib/request-security";
 
 export async function POST(req: Request) {
   if (!isAllowedOrigin(req)) {
     return Response.json({ error: "Origin is not allowed" }, { status: 403 });
   }
 
+  if (getMissingProductionSecurityConfig().length > 0) {
+    return Response.json(
+      { error: "Voice chat is temporarily unavailable" },
+      { status: 503 }
+    );
+  }
+
+  if (!hasValidSecuritySession(req)) {
+    return Response.json(
+      { error: "Verification is required" },
+      { status: 403 }
+    );
+  }
+
   const limit = await checkRateLimit({
     scope: "voice",
     identifier: getClientIdentifier(req),
-    limit: 15,
+    limit: 6,
     windowSeconds: 3600,
+    globalLimit: 60,
   });
   if (!limit.configured) {
     return Response.json(
@@ -95,52 +116,11 @@ export async function POST(req: Request) {
       { status: 200 }
     );
   } catch (err) {
-    console.error("[voice-token] Error:", err);
+    logRouteError("voice-token", err);
     await roomService.deleteRoom(roomName).catch(() => undefined);
     return Response.json(
       { error: "Failed to create voice session" },
       { status: 500 }
     );
-  }
-}
-
-function isAllowedOrigin(request: Request): boolean {
-  if (process.env.NODE_ENV !== "production") return true;
-
-  const origin = request.headers.get("origin");
-  if (!origin) return true;
-
-  try {
-    const originHost = new URL(origin).host;
-    const requestHost = new URL(request.url).host;
-    if (originHost === requestHost) return true;
-  } catch {
-    return false;
-  }
-
-  const allowedHosts = [
-    process.env.APP_URL,
-    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-    process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : undefined,
-    process.env.VERCEL_BRANCH_URL
-      ? `https://${process.env.VERCEL_BRANCH_URL}`
-      : undefined,
-  ]
-    .filter((value): value is string => Boolean(value))
-    .map((value) => {
-      try {
-        return new URL(value).host;
-      } catch {
-        return null;
-      }
-    })
-    .filter((value): value is string => Boolean(value));
-
-  try {
-    return allowedHosts.includes(new URL(origin).host);
-  } catch {
-    return false;
   }
 }

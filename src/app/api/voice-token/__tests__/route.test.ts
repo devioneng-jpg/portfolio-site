@@ -79,7 +79,7 @@ describe("POST /api/voice-token", () => {
   });
 
   it("limits repeated voice session creation", async () => {
-    for (let index = 0; index < 15; index += 1) {
+    for (let index = 0; index < 6; index += 1) {
       expect((await POST(voiceRequest())).status).toBe(200);
     }
     expect((await POST(voiceRequest())).status).toBe(429);

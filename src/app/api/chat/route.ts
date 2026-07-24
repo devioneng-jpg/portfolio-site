@@ -14,6 +14,12 @@ import {
   checkRateLimit,
   getClientIdentifier,
 } from "@/lib/rate-limit";
+import {
+  getMissingProductionSecurityConfig,
+  hasValidSecuritySession,
+  isAllowedOrigin,
+  logRouteError,
+} from "@/lib/request-security";
 import type { PortfolioMessage } from "@/lib/chat-types";
 
 export const maxDuration = 30;
@@ -126,6 +132,18 @@ You have two types of tools:
 - If there is no connection to Devion, say you are built for questions about him and offer one simple follow-up, not a menu of options`;
 
 export async function POST(req: Request) {
+  if (!isAllowedOrigin(req)) {
+    return jsonResponse({ error: "Origin is not allowed" }, 403);
+  }
+
+  if (getMissingProductionSecurityConfig().length > 0) {
+    return jsonResponse({ error: "Chat is temporarily unavailable" }, 503);
+  }
+
+  if (!hasValidSecuritySession(req)) {
+    return jsonResponse({ error: "Verification is required" }, 403);
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return jsonResponse({ error: "Chat is not configured" }, 503);
   }
@@ -140,6 +158,7 @@ export async function POST(req: Request) {
     identifier: getClientIdentifier(req),
     limit: 30,
     windowSeconds: 3600,
+    globalLimit: 300,
   });
   if (!limit.configured) {
     return jsonResponse({ error: "Chat is temporarily unavailable" }, 503);
@@ -183,7 +202,11 @@ export async function POST(req: Request) {
     },
   });
 
-  if (!validated.success || validated.data.length > MAX_MESSAGES) {
+  if (
+    !validated.success ||
+    validated.data.length > MAX_MESSAGES ||
+    !hasValidConversationSequence(validated.data, parsed.data.trigger)
+  ) {
     return jsonResponse({ error: "Invalid messages" }, 400);
   }
 
@@ -200,7 +223,11 @@ export async function POST(req: Request) {
   }
 
   try {
-    const modelMessages = await convertToModelMessages(validated.data, {
+    const sanitizedMessages = validated.data.map((message) => ({
+      ...message,
+      parts: message.parts.filter((part) => part.type !== "data-trace"),
+    })) as PortfolioMessage[];
+    const modelMessages = await convertToModelMessages(sanitizedMessages, {
       tools: allTools,
     });
 
@@ -224,7 +251,10 @@ export async function POST(req: Request) {
             const outTok = usage.outputTokens ?? 0;
             const cost = estimateCost(inTok, outTok);
             const traceId = trace.getActiveSpan()?.spanContext().traceId;
-            const traceUrl = traceId ? buildTraceUrl(traceId) ?? undefined : undefined;
+            const traceUrl =
+              process.env.SHOW_AI_TRACE === "true" && traceId
+                ? buildTraceUrl(traceId) ?? undefined
+                : undefined;
 
             writer.write({
               type: "data-trace",
@@ -246,9 +276,40 @@ export async function POST(req: Request) {
 
     return createUIMessageStreamResponse({ stream });
   } catch (error) {
-    console.error("[chat] Error:", error);
+    logRouteError("chat", error);
     return jsonResponse({ error: "Something went wrong" }, 500);
   }
+}
+
+export function hasValidConversationSequence(
+  messages: PortfolioMessage[],
+  trigger: "submit-message" | "regenerate-message"
+): boolean {
+  if (messages.length === 0) return false;
+
+  const ids = new Set<string>();
+  for (const [index, message] of messages.entries()) {
+    if (
+      ids.has(message.id) ||
+      (message.role !== "user" && message.role !== "assistant") ||
+      (index > 0 && message.role === messages[index - 1]?.role)
+    ) {
+      return false;
+    }
+    ids.add(message.id);
+
+    if (
+      message.role === "user" &&
+      message.parts.some((part) => part.type !== "text")
+    ) {
+      return false;
+    }
+  }
+
+  if (messages[0]?.role !== "user") return false;
+  return trigger === "submit-message"
+    ? messages.at(-1)?.role === "user"
+    : messages.at(-1)?.role === "assistant";
 }
 
 function jsonResponse(

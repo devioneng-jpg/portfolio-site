@@ -3,6 +3,7 @@
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PrivacyNotice } from "./privacy-notice";
 
 interface ChatInputProps {
   input: string;
@@ -66,6 +67,7 @@ export function ChatInput({
           <Send className="size-4" aria-hidden="true" />
         </Button>
       </form>
+      <PrivacyNotice />
     </div>
   );
 }
